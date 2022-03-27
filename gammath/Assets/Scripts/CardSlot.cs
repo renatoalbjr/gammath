@@ -5,22 +5,22 @@ using UnityEngine.EventSystems;
 
 public class CardSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    [SerializeField] private SpriteRenderer sprite;
+   /*  [SerializeField] private SpriteRenderer sprite;
 
-    private Color originalColor;
+    private Color originalColor; */
 
     void Awake(){
-        sprite = GetComponent<SpriteRenderer>();
-        if(sprite) originalColor = sprite.color;
+        /* sprite = GetComponent<SpriteRenderer>();
+        if(sprite) originalColor = sprite.color; */
     }
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        sprite.color = Color.green;
+        /* sprite.color = Color.green; */
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        sprite.color = originalColor;
+        /* sprite.color = originalColor; */
     }
 }

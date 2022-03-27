@@ -11,19 +11,23 @@ public class CardDragAndDrop : MonoBehaviour, IBeginDragHandler,IDragHandler, IE
     private Vector3 newPosOnScreen;
 
     private Collider2D myCollider;
-    private bool dragging;
+    public bool dragging;
 
     void Awake(){
-        mainCam = Camera.main;
         myCollider = GetComponent<Collider2D>();
+
+        mainCam = Camera.main;
         dragging = false;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
         offset = GetMousePosition(eventData) - transform.position; 
-        dragging = true;
-        myCollider.enabled = false;       
+        //dragging = true;
+        myCollider.enabled = false;   
+
+        //Trigger an event
+        EventManager.current.StartCardBeginDrag(gameObject);
     }
 
     public void OnDrag(PointerEventData eventData)

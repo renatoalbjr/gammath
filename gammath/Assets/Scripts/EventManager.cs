@@ -4,7 +4,7 @@ using System;
 public class EventManager : MonoBehaviour 
 {
     public static EventManager current;
-    public event Action ExampleEvent;
+    public event Action<GameObject> OnCardBeginDrag;
 
     private void Awake()
     {
@@ -16,16 +16,7 @@ public class EventManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    private void Update(){
-        if(Input.GetMouseButtonDown(0)){
-            //if(ExampleEvent != null)
-            //   ExampleEvent();
-
-            ExampleEvent?.Invoke(); 
-        }
+    public void StartCardBeginDrag(GameObject card){
+        OnCardBeginDrag?.Invoke(card);
     }
-
-    /* public void StartExampleEvent(int id){
-        ExampleEvent?.Invoke();
-    } */
 }

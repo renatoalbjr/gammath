@@ -7,12 +7,18 @@ public class BattleManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        
+        EventManager.current.OnCardBeginDrag += CardBeginDragHandler;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+    private void OnDisable(){
+        EventManager.current.OnCardBeginDrag -= CardBeginDragHandler;
+    }
+
+    //OnCardBeginDrag += CardBeginDragHandler
+    //CardBeginDragHandler checks if the card is draggable and other stuff
+    //CardBeginDragHandler(){}
+    private void CardBeginDragHandler(GameObject card){
+        CardDragAndDrop comp = card.GetComponent<CardDragAndDrop>();
+        if(comp) comp.dragging = true;
     }
 }
