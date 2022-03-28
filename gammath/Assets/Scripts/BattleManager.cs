@@ -4,21 +4,29 @@ using UnityEngine;
 
 public class BattleManager : MonoBehaviour
 {
-    // Start is called before the first frame update
     void Start()
     {
         EventManager.current.OnCardBeginDrag += CardBeginDragHandler;
+        EventManager.current.OnDropOnSlot += DropOnSlotHandler;
     }
 
     private void OnDisable(){
         EventManager.current.OnCardBeginDrag -= CardBeginDragHandler;
+        EventManager.current.OnDropOnSlot -= DropOnSlotHandler;
     }
 
-    //OnCardBeginDrag += CardBeginDragHandler
-    //CardBeginDragHandler checks if the card is draggable and other stuff
-    //CardBeginDragHandler(){}
-    private void CardBeginDragHandler(GameObject card){
-        CardDragAndDrop comp = card.GetComponent<CardDragAndDrop>();
-        if(comp) comp.dragging = true;
+    private void CardBeginDragHandler(CardDragAndDrop cardDrag){
+        if(cardDrag){
+            Transform cardParent = cardDrag.transform.parent;
+            cardDrag.dragging = true;
+            cardDrag.transform.SetParent(null);
+        }
+    }
+
+    private void DropOnSlotHandler(CardSlot cardSlot, GameObject card){
+        if(cardSlot != null){
+            if(cardSlot.transform.childCount == 0)
+                cardSlot.canDrop = true;
+        }
     }
 }

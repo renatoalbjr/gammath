@@ -6,52 +6,58 @@ using UnityEngine.EventSystems;
 public class CardDragAndDrop : MonoBehaviour, IBeginDragHandler,IDragHandler, IEndDragHandler
 {
     private Camera mainCam;
-    private Vector3 offset;
-    private Vector3 newPos;
-    private Vector3 newPosOnScreen;
-
     private Collider2D myCollider;
+    private Vector3 offset;
+    private Transform originalParent;
+    private Vector3 originalPosition;
+    //private int originalSiblingIndex;
     public bool dragging;
 
     void Awake(){
         myCollider = GetComponent<Collider2D>();
-
         mainCam = Camera.main;
         dragging = false;
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        offset = GetMousePosition(eventData) - transform.position; 
-        //dragging = true;
+        originalParent = transform.parent;
+        originalPosition = transform.position;
+
+        offset = GetMousePosition(eventData) - transform.position;
         myCollider.enabled = false;   
 
-        //Trigger an event
-        EventManager.current.StartCardBeginDrag(gameObject);
+        EventManager.current.StartCardBeginDrag(this);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
         if(!dragging) return;
 
-        newPos = GetMousePosition(eventData) - offset;
-        newPosOnScreen = GetWorldPointInScreenPosition(newPos);
+        Vector3 newPos = GetMousePosition(eventData) - offset;
+        Vector3 newPosOnScreen = GetWorldPointInScreenPosition(newPos);
         if(
             newPosOnScreen.x > 0
             && newPosOnScreen.y > 0
             && newPosOnScreen.x < mainCam.scaledPixelWidth
             && newPosOnScreen.y < mainCam.scaledPixelHeight
         ){
-            //newPos.z = transform.position.z;
             transform.position = newPos;
         }
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        if(transform.parent == null){
+            Debug.Log("OnEndDrag: "+ transform.parent == null ? transform.parent.ToString() : "null");
+            transform.SetParent(originalParent);
+            //transform.SetSiblingIndex(originalSiblingIndex);
+            transform.position = originalPosition;
+        }
         dragging = false;
         myCollider.enabled = true;
     }
+
     Vector3 GetMousePosition(PointerEventData eventData){
         return mainCam.ScreenToWorldPoint(eventData.position); 
     }

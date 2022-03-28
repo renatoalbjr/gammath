@@ -3,24 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class CardSlot : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class CardSlot : MonoBehaviour, IDropHandler
 {
-   /*  [SerializeField] private SpriteRenderer sprite;
+    public bool canDrop;
 
-    private Color originalColor; */
-
-    void Awake(){
-        /* sprite = GetComponent<SpriteRenderer>();
-        if(sprite) originalColor = sprite.color; */
+    void Start(){
+        canDrop = false;
     }
 
-    public void OnPointerEnter(PointerEventData eventData)
+    //This is called before OnEndDrag
+    public void OnDrop(PointerEventData eventData)
     {
-        /* sprite.color = Color.green; */
-    }
-
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        /* sprite.color = originalColor; */
+        EventManager.current.StartDropOnSlot(this, eventData.pointerDrag);
+        if(canDrop){
+            GameObject card = eventData.pointerDrag;
+            card.transform.position = transform.position;
+            card.transform.SetParent(transform);
+            
+            canDrop = false;
+        }
     }
 }
