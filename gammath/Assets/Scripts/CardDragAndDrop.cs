@@ -17,10 +17,12 @@ public class CardDragAndDrop : MonoBehaviour, IBeginDragHandler,IDragHandler, IE
         myCollider = GetComponent<Collider2D>();
         mainCam = Camera.main;
         dragging = false;
+        //Debug.Log(mainCam.orthographicSize.ToString());
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        Debug.Log("OnBeginDrag: "+gameObject.name);
         originalParent = transform.parent;
         originalPosition = transform.position;
 
@@ -32,6 +34,7 @@ public class CardDragAndDrop : MonoBehaviour, IBeginDragHandler,IDragHandler, IE
 
     public void OnDrag(PointerEventData eventData)
     {
+        Debug.Log("OnDrag: "+gameObject.name+".draggin = "+dragging.ToString());
         if(!dragging) return;
 
         Vector3 newPos = GetMousePosition(eventData) - offset;
@@ -48,8 +51,9 @@ public class CardDragAndDrop : MonoBehaviour, IBeginDragHandler,IDragHandler, IE
 
     public void OnEndDrag(PointerEventData eventData)
     {
+        Debug.Log("OnEndDrag: "+gameObject.name);
         if(transform.parent == null){
-            Debug.Log("OnEndDrag: "+ transform.parent == null ? transform.parent.ToString() : "null");
+            //Debug.Log("OnEndDrag: "+ transform.parent == null ? transform.parent.ToString() : "null");
             transform.SetParent(originalParent);
             //transform.SetSiblingIndex(originalSiblingIndex);
             transform.position = originalPosition;
