@@ -8,18 +8,18 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
     internal Vector3 offset;
     internal Transform originalParent;
     internal Vector3 originalPosition;
-    public bool dragging;
+    public bool canDrag;
 
     void Awake(){
         myCollider = GetComponent<Collider2D>();
         mainCam = Camera.main;
-        dragging = false;
+        canDrag = false;
     }
 
     public virtual void OnBeginDrag(PointerEventData eventData)
     {
         StartBeginDragEvent(eventData);
-        if(!dragging) return;
+        if(!canDrag) return;
 
         offset = GetMousePosition(eventData) - transform.position;
         originalParent = transform.parent;
@@ -42,7 +42,7 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 
     public virtual void OnDrag(PointerEventData eventData)
     {
-        if(!dragging) return;
+        if(!canDrag) return;
 
         Vector3 newPos = GetMousePosition(eventData) - offset;
         Vector3 newPosOnScreen = GetWorldPointInScreenPosition(newPos);
@@ -52,14 +52,14 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
             && newPosOnScreen.x < mainCam.scaledPixelWidth
             && newPosOnScreen.y < mainCam.scaledPixelHeight
         ){
-            transform.position = newPos;
+            transform.position = new Vector3(newPos.x, newPos.y, mainCam.transform.position.z+1);
         }
     }
 
     public virtual void OnEndDrag(PointerEventData eventData)
     {
         if(transform.parent != null){
-            dragging = false;
+            canDrag = false;
             myCollider.enabled = true;
             return;
         }
@@ -74,7 +74,7 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
             transform.SetParent(originalParent);
         }
         
-        dragging = false;
+        canDrag = false;
         myCollider.enabled = true;
     }
 
@@ -88,6 +88,6 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 
     //Set dragging to true by default
     internal virtual void StartBeginDragEvent(PointerEventData eventData){
-        dragging = true;
+        canDrag = true;
     }
 }

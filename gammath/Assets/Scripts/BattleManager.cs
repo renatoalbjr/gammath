@@ -17,7 +17,7 @@ public class BattleManager : MonoBehaviour
 
     private void CardBeginDragHandler(DraggableCard cardDrag){
         if(cardDrag){
-            cardDrag.dragging = true;
+            cardDrag.canDrag = true;
         }
     }
 

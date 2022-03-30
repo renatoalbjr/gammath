@@ -58,25 +58,26 @@ public class HandManager : Slot
 
     internal void UpdateLayout(){/* 
         Debug.Log("HandManager :: UpdateLayout :: Starting method..."); */
-        if(filledCapacity < 2) return;
+        int childCount = transform.childCount;
+        if(childCount < 2) return;
 
-        float avgHeight = (handSize.y - cSize.y)/(filledCapacity-1);
+        float avgHeight = (handSize.y - cSize.y)/(childCount-1);
         float updateHeight = Mathf.Min(avgHeight, cVisible.y);
-        float updateOffset = ((filledCapacity-1)*updateHeight+cSize.y)/2;/*
+        float updateOffset = ((childCount-1)*updateHeight+cSize.y)/2;/*
 
         Debug.Log("HandManager :: UpdateLayout :: avgHeight = "+avgHeight.ToString());
         Debug.Log("HandManager :: UpdateLayout :: updateHeight = "+updateHeight.ToString());
         Debug.Log("HandManager :: UpdateLayout :: updateOffset = "+updateOffset.ToString());
         Debug.Log("HandManager :: UpdateLayout :: firstHeight = "+firstHeight.ToString()); */
 
-        for (int i = 0; i < filledCapacity; i++)
+        for (int i = 0; i < childCount; i++)
         {
             Transform t = transform.GetChild(i);
             if(t == null){
                 Debug.Log("HandManager :: UpdateLayout :: Missing child of index "+i.ToString());
                 return;
             }
-            t.position = new Vector3(t.position.x, cSize.y/2+updateHeight*i-updateOffset, -filledCapacity+i);
+            t.position = new Vector3(t.position.x, cSize.y/2+updateHeight*i-updateOffset, -childCount+i);
         }
     }
 

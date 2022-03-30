@@ -19,7 +19,7 @@ public class Slot: MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerEx
 
     public virtual void Start(){
         canDrop = false;
-        filledCapacity = 0;
+        filledCapacity = transform.childCount;
     }
 
     //Trigger and event to get canDrop validation, then it places the object
@@ -86,7 +86,11 @@ public class Slot: MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerEx
     //Instatiate the placeholder with the prefab and parent it to this slot
     internal virtual void CreatePlaceholder(Draggable dragComp)
     {
-        placeholder = Instantiate(placeholderPrefab, transform);
+        //placeholder = Instantiate(placeholderPrefab, transform);
+        placeholder = Instantiate(placeholderPrefab,
+                                  new Vector3(transform.position.x, transform.position.y, transform.position.z - 1),
+                                  Quaternion.identity,
+                                  transform);
     }
 
     //Only destroy the placeholder object
