@@ -13,6 +13,8 @@ public class CardDragAndDrop : MonoBehaviour, IBeginDragHandler,IDragHandler, IE
     //private int originalSiblingIndex;
     public bool dragging;
 
+    public PlaceholderBase placeholder;
+
     void Awake(){
         myCollider = GetComponent<Collider2D>();
         mainCam = Camera.main;
@@ -22,19 +24,23 @@ public class CardDragAndDrop : MonoBehaviour, IBeginDragHandler,IDragHandler, IE
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+
         Debug.Log("OnBeginDrag: "+gameObject.name);
+        //Cache information about its last valid transform
         originalParent = transform.parent;
         originalPosition = transform.position;
 
+        //Get a offset for dragging and disables its own collider
         offset = GetMousePosition(eventData) - transform.position;
         myCollider.enabled = false;   
 
+        //Trigger the event informing it started to being dragged
         EventManager.current.StartCardBeginDrag(this);
     }
 
     public void OnDrag(PointerEventData eventData)
     {
-        Debug.Log("OnDrag: "+gameObject.name+".draggin = "+dragging.ToString());
+        //Debug.Log("OnDrag: "+gameObject.name+".draggin = "+dragging.ToString());
         if(!dragging) return;
 
         Vector3 newPos = GetMousePosition(eventData) - offset;
@@ -53,10 +59,14 @@ public class CardDragAndDrop : MonoBehaviour, IBeginDragHandler,IDragHandler, IE
     {
         Debug.Log("OnEndDrag: "+gameObject.name);
         if(transform.parent == null){
-            //Debug.Log("OnEndDrag: "+ transform.parent == null ? transform.parent.ToString() : "null");
-            transform.SetParent(originalParent);
-            //transform.SetSiblingIndex(originalSiblingIndex);
-            transform.position = originalPosition;
+            if(originalParent != null){
+                CardSlot slot = originalParent.GetComponent<CardSlot>();
+                if(slot != null)
+                    slot.PlaceCard(this);
+            }
+            else{
+                transform.position = originalPosition;
+            }    
         }
         dragging = false;
         myCollider.enabled = true;

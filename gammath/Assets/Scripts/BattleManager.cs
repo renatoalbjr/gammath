@@ -25,7 +25,7 @@ public class BattleManager : MonoBehaviour
 
     private void DropOnSlotHandler(CardSlot cardSlot, GameObject card){
         if(cardSlot != null){
-            if(cardSlot.transform.childCount == 0)
+            if(cardSlot.isEmpty)
                 cardSlot.canDrop = true;
         }
     }
