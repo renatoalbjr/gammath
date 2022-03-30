@@ -4,89 +4,86 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class HandManager : MonoBehaviour, IDropHandler, IPointerEnterHandler, IPointerExitHandler
+public class HandManager : Slot
 {
     private Camera mainCam;
-    public int maxCapacity;
-    public float cardHeight;
-    public float cardSlotWidth;
-    public float maxVisibleHeight;
-    public HandPlaceholder placeholderPrefab;
+
+    public Vector2 cardDimensions;
+    public Vector2 maxVisibleCardDimensions;
+    public Vector2 screenRelativePosition;
+    public Vector2 handSize;
+    public Vector2 handOffset;
+
+    //x = top, y = right, z = bottom, w = left
+    public Vector4 boxColliderPadding;
+
+    internal Vector2 cSize;
+    internal Vector2 cVisible;
+    internal Vector2 sRelPos;
+    internal Vector4 bcPadding;
+    internal BoxCollider2D myCollider;
 
     // Start is called before the first frame update
-    void Start()
+    public override void Start()
     {
+        base.Start();
         mainCam = Camera.main;
-        transform.position = mainCam.ScreenToWorldPoint(new Vector3(0, mainCam.scaledPixelHeight/2, 0));
-        transform.position = new Vector3(transform.position.x, transform.position.y, -1);
+        myCollider = GetComponent<BoxCollider2D>();
 
-        EventManager.current.OnCardBeginDrag += CardBeginDragHandler;
+        cSize = cardDimensions;
+        cVisible = maxVisibleCardDimensions;
+        sRelPos = screenRelativePosition;
+        bcPadding = boxColliderPadding;
+
+        if(sRelPos.x > 1) sRelPos.x = 1;
+        if(sRelPos.y > 1) sRelPos.y = 1;
+        if(sRelPos.x < 0) sRelPos.x = 0;
+        if(sRelPos.y < 0) sRelPos.y = 0;
+
+        myCollider.size = handSize + new Vector2(bcPadding.y + bcPadding.w,
+                                                 bcPadding.x + bcPadding.z);
+        
+        transform.position = mainCam.ScreenToWorldPoint(new Vector3(sRelPos.x * mainCam.scaledPixelWidth,
+                                                                    sRelPos.y * mainCam.scaledPixelHeight,
+                                                                    0));
+        
+        transform.position = new Vector3(transform.position.x + handOffset.x,
+                                         transform.position.y + handOffset.y,
+                                         -1);
+        
+
+        myCollider.offset = new Vector2(myCollider.size.x / 2 - (bcPadding.w + handSize.x / 2),
+                                        myCollider.size.y / 2 - (bcPadding.z + handSize.y / 2));
     }
-    public void CardBeginDragHandler(CardDragAndDrop dragComp)
-    {
-        //Triggered when one of its children begins being dragged
-        /* if(dragComp.transform.IsChildOf(transform)){
-            //Create and give away the placeholder object
-            int originalSibilingIndex = dragComp.transform.GetSiblingIndex();
-            CreatePlaceholder(dragComp);
-            dragComp.placeholder.transform.SetSiblingIndex(originalSibilingIndex);
-            dragComp.placeholder.transform.position = dragComp.transform.position;
-        } */
-    }
-    public void OnPointerEnter(PointerEventData eventData)
-    {
-        Debug.Log("OnPointerEnter");
-        //Triggered when a object being dragged enters this area
-        if(eventData.pointerDrag != null){
-            CardDragAndDrop dragComp = eventData.pointerDrag.GetComponent<CardDragAndDrop>();
-            //Create and give away the placeholder object
-            CreatePlaceholder(dragComp);
+
+    internal void UpdateLayout(){/* 
+        Debug.Log("HandManager :: UpdateLayout :: Starting method..."); */
+        if(filledCapacity < 2) return;
+
+        float avgHeight = (handSize.y - cSize.y)/(filledCapacity-1);
+        float updateHeight = Mathf.Min(avgHeight, cVisible.y);
+        float updateOffset = ((filledCapacity-1)*updateHeight+cSize.y)/2;/*
+
+        Debug.Log("HandManager :: UpdateLayout :: avgHeight = "+avgHeight.ToString());
+        Debug.Log("HandManager :: UpdateLayout :: updateHeight = "+updateHeight.ToString());
+        Debug.Log("HandManager :: UpdateLayout :: updateOffset = "+updateOffset.ToString());
+        Debug.Log("HandManager :: UpdateLayout :: firstHeight = "+firstHeight.ToString()); */
+
+        for (int i = 0; i < filledCapacity; i++)
+        {
+            Transform t = transform.GetChild(i);
+            if(t == null){
+                Debug.Log("HandManager :: UpdateLayout :: Missing child of index "+i.ToString());
+                return;
+            }
+            t.position = new Vector3(t.position.x, cSize.y/2+updateHeight*i-updateOffset, -filledCapacity+i);
         }
     }
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        //Triggered when a object being dragged exits this area
-        if(eventData.pointerDrag != null){
-            CardDragAndDrop dragComp = eventData.pointerDrag.GetComponent<CardDragAndDrop>();
-            //Destroy the placeholder object
-            DestroyPlaceholder(dragComp);
-        }
-    }
 
-
-    public void OnDrop(PointerEventData eventData){
-        //Check if the object can be dropped
-        EventManager.current.StartDropOnHand(this, eventData.pointerDrag);
-
-        CardDragAndDrop dragComp = eventData.pointerDrag.GetComponent<CardDragAndDrop>();
-        //If it can, then replace the placeholder with the dropped object
-        int originalSibilingIndex = dragComp.placeholder.transform.GetSiblingIndex();
-        dragComp.transform.SetParent(transform);
-        dragComp.transform.SetSiblingIndex(originalSibilingIndex);
-        dragComp.transform.position = dragComp.placeholder.transform.position;
-        DestroyPlaceholder(dragComp);
-    }
-
-    public void MoveChildUp(int childIndex){
-        //Handle how a child object would be moved up (sibilingIndex--)
-    }
-
-    public void MoveChildDown(int childIndex){
-        //Handle how a child object would be moved down (sibilingIndex++)
-    }
-
-    public void UpdateLayout(){
-        //Handle how to layout its children (called when their number change)
-    }
-
-    public void CreatePlaceholder(CardDragAndDrop dragComp){
-        if(dragComp == null) return;
-        dragComp.placeholder = Instantiate(placeholderPrefab, transform);
-    }
-
-    private void DestroyPlaceholder(CardDragAndDrop dragComp)
-    {
-        if(dragComp == null) return;
-        Destroy(dragComp.placeholder.gameObject);
+    int lastChildCount = 0;
+    public void Update(){
+        if(lastChildCount != transform.childCount)
+            UpdateLayout();
+        lastChildCount = transform.childCount;
     }
 }

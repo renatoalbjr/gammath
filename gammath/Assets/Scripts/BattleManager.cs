@@ -6,26 +6,24 @@ public class BattleManager : MonoBehaviour
 {
     void Start()
     {
-        EventManager.current.OnCardBeginDrag += CardBeginDragHandler;
-        EventManager.current.OnDropOnSlot += DropOnSlotHandler;
+        EventManager.current.OnBeginCardDrag += CardBeginDragHandler;
+        EventManager.current.OnDropOnCardSlot += DropOnCardSlotHandler;
     }
 
     private void OnDisable(){
-        EventManager.current.OnCardBeginDrag -= CardBeginDragHandler;
-        EventManager.current.OnDropOnSlot -= DropOnSlotHandler;
+        EventManager.current.OnBeginCardDrag -= CardBeginDragHandler;
+        EventManager.current.OnDropOnCardSlot -= DropOnCardSlotHandler;
     }
 
-    private void CardBeginDragHandler(CardDragAndDrop cardDrag){
+    private void CardBeginDragHandler(DraggableCard cardDrag){
         if(cardDrag){
-            Transform cardParent = cardDrag.transform.parent;
             cardDrag.dragging = true;
-            cardDrag.transform.SetParent(null);
         }
     }
 
-    private void DropOnSlotHandler(CardSlot cardSlot, GameObject card){
+    private void DropOnCardSlotHandler(CardSlot cardSlot, GameObject card){
         if(cardSlot != null){
-            if(cardSlot.isEmpty)
+            if(cardSlot.filledCapacity+1 <= cardSlot.maxCapacity)
                 cardSlot.canDrop = true;
         }
     }

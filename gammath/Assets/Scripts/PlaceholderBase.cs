@@ -1,19 +1,18 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public abstract class PlaceholderBase : MonoBehaviour
+/* Should be used to create prefabs
+*/
+
+public abstract class PlaceholderBase : MonoBehaviour, IMoveHandler
 {
-    virtual public void MoveUp(){
-        return;
+    public virtual void OnMove(AxisEventData eventData){
+        debugPrint(eventData);
     }
-    virtual public void MoveDown(){
-        return;
-    }
-    virtual public void MoveLeft(){
-        return;
-    }
-    virtual public void MoveRight(){
-        return;
+
+    internal virtual void debugPrint(AxisEventData eventData){
+        Debug.Log(eventData.ToString());
     }
 }

@@ -122,4 +122,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a6ec080bdbe945a45a321b06db659179, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canDrop: 0
+  maxCapacity: 1
+  placeholderPrefab: {fileID: 0}

@@ -4,9 +4,9 @@ using System;
 public class EventManager : MonoBehaviour 
 {
     public static EventManager current;
-    public event Action<CardDragAndDrop> OnCardBeginDrag;
-    public event Action<CardSlot, GameObject> OnDropOnSlot;
-    public event Action OnDropOnHand;
+    public event Action<DraggableCard> OnBeginCardDrag;
+    public event Action<CardSlot, GameObject> OnDropOnCardSlot;
+    public event Action<HandManager, GameObject> OnDropOnHand;
 
     private void Awake()
     {
@@ -18,14 +18,14 @@ public class EventManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
-    public void StartCardBeginDrag(CardDragAndDrop cardDrag){
-        OnCardBeginDrag?.Invoke(cardDrag);
+    public void StartBeginCardDrag(DraggableCard dragComp){
+        OnBeginCardDrag?.Invoke(dragComp);
     }
-    public void StartDropOnSlot(CardSlot cardSlot, GameObject card){
-        OnDropOnSlot?.Invoke(cardSlot, card);
+    public void StartDropOnCardSlot(CardSlot cardSlot, GameObject draggableObject){
+        OnDropOnCardSlot?.Invoke(cardSlot, draggableObject);
     }
 
-    public void StartDropOnHand(HandManager hand, GameObject card){
-        OnDropOnHand?.Invoke();
+    public void StartDropOnHand(HandManager hand, GameObject draggableObject){
+        OnDropOnHand?.Invoke(hand, draggableObject);
     }
 }
