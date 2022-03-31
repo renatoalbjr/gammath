@@ -123,4 +123,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxCapacity: 1
-  placeholderPrefab: {fileID: 0}
+  placeholderPrefab: {fileID: -5292249921494066590, guid: aedf70f32bc41a046b8ebdd1200b01ba, type: 3}
