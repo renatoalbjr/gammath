@@ -122,5 +122,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 140177f618743f443892bfa67b33707e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  dragging: 0
-  placeholder: {fileID: 0}
+  canDrag: 0

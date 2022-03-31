@@ -74,7 +74,7 @@ public class HandManager : Slot
         {
             Transform t = transform.GetChild(i);
             if(t == null){
-                Debug.Log("HandManager :: UpdateLayout :: Missing child of index "+i.ToString());
+                Debug.Log("Missing child of index "+i.ToString());
                 return;
             }
             t.position = new Vector3(t.position.x, cSize.y/2+updateHeight*i-updateOffset, -childCount+i);

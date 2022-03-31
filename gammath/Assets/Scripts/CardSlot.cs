@@ -5,8 +5,8 @@ using UnityEngine.EventSystems;
 
 public class CardSlot : Slot
 {
-    internal override void StartDropOnSlotEvent(PointerEventData eventData)
+    internal override void ValidateCanPlace<T>(T tObj)
     {
-        EventManager.current.StartDropOnCardSlot(this, eventData.pointerDrag);
+        EventManager.current.StartDropOnCardSlot(this, tObj.GetComponent<Draggable>());
     }
 }

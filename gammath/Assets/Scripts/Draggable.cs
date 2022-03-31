@@ -29,7 +29,7 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         {
             Slot slot = transform.parent.GetComponent<Slot>();
             if(slot != null){
-                slot.RemoveDraggable(this);
+                slot.Remove(this);
             }
             else
             {
@@ -67,7 +67,7 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         Slot slot = originalParent?.gameObject?.GetComponent<Slot>();
 
         if(slot != null){
-            slot.PlaceDraggable(this);
+            slot.Place(this);
         }
         else{
             transform.position = originalPosition;

@@ -15,16 +15,16 @@ public class BattleManager : MonoBehaviour
         EventManager.current.OnDropOnCardSlot -= DropOnCardSlotHandler;
     }
 
-    private void CardBeginDragHandler(DraggableCard cardDrag){
-        if(cardDrag){
-            cardDrag.canDrag = true;
+    private void CardBeginDragHandler(DraggableCard dragComp){
+        if(dragComp){
+            dragComp.canDrag = true;
         }
     }
 
-    private void DropOnCardSlotHandler(CardSlot cardSlot, GameObject card){
+    private void DropOnCardSlotHandler(CardSlot cardSlot, Draggable dragComp){
         if(cardSlot != null){
             if(cardSlot.filledCapacity+1 <= cardSlot.maxCapacity)
-                cardSlot.canDrop = true;
+                cardSlot.canPlace = true;
         }
     }
 }
