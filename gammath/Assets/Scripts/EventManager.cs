@@ -1,25 +1,44 @@
 using UnityEngine;
 using System;
 
+/// <summary>
+/// Holds declarations of events and the methods to invoke them
+/// </summary>
+/// <remarks>
+/// <para>Events syntax: On[Event]</para>
+/// <para>Invoke events syntax: Start[Event]()</para>
+/// <para>All events are C# Actions</para>
+/// </remarks>
 public class EventManager : MonoBehaviour 
 {
+    #region Variables
     public static EventManager Instance;
+
+    #region Player input events
     public event Action<DraggableCard> OnBeginCardDrag;
     public event Action<CardSlot, Draggable> OnDropOnCardSlot;
     public event Action<HandManager, Draggable> OnDropOnHand;
+    #endregion
 
+    #region Game state events
     public event Action OnGameStateChange;
     public event Action OnTurnOwnerChange;
     public event Action OnTurnStageChange;
     public event Action OnGameOver;
     public event Action OnSceneUnload;
     public event Action OnAttack;
+    #endregion
+    #endregion
 
-    //Undestanding how those actions are invoked
-    //public event Action LoopTester;
+    // ########################################################################################## //
+
+    #region Unity Methods
+    #region Awake
+    // ########################################################################################## //
 
     void Awake()
     {
+        // ---Singleton Implementation---
         if(Instance == null)
             Instance = this;
         else
@@ -27,7 +46,13 @@ public class EventManager : MonoBehaviour
 
         DontDestroyOnLoad(gameObject);
     }
+    #endregion
+    #endregion
 
+    // ########################################################################################## //
+
+    #region Invoke Methods
+    #region Player events
     public void StartBeginCardDrag(DraggableCard dragComp){
         OnBeginCardDrag?.Invoke(dragComp);
     }
@@ -38,7 +63,9 @@ public class EventManager : MonoBehaviour
     public void StartDropOnHand(HandManager hand, Draggable draggableObject){
         OnDropOnHand?.Invoke(hand, draggableObject);
     }
+    #endregion
 
+    #region Game state events
     public void StartGameStateChange(){
         OnGameStateChange?.Invoke();
     }
@@ -62,4 +89,6 @@ public class EventManager : MonoBehaviour
     public void StartAtack(){
         OnAttack?.Invoke();
     }
+    #endregion
+    #endregion
 }

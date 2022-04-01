@@ -6,6 +6,8 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     #region Variables
+    public GameManager Instance;
+
     // ---Serialized variables---
     [SerializeField] private Player playerOne;
     [SerializeField] private Player playerTwo;
@@ -28,6 +30,14 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
+        // ---Singleton Implementation---
+        if(Instance == null)
+            Instance = this;
+        else
+            Destroy(gameObject);
+
+        DontDestroyOnLoad(gameObject);
+
         // ---Initialize intenal use variables---
         gameState = GameState.Loading;
         turnOwner = TurnOwner.None;
