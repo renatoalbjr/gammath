@@ -58,6 +58,7 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 
     public virtual void OnEndDrag(PointerEventData eventData)
     {
+        EventManager.Instance.StartEndDrag(this);
         if(transform.parent != null){
             canDrag = false;
             myCollider.enabled = true;

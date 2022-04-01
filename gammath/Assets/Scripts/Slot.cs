@@ -12,7 +12,7 @@ public class Slot: ContainerBase, IDropHandler, IPointerEnterHandler, IPointerEx
         }
         ValidateCanPlace(dragComp);
         if (canPlace)
-            Place(dragComp);
+            Place(dragComp); //Unity says OnDrop will always be triggered before OnEndDrag (If so, the placeholder will still exists during this call)
     }
 
     //Handle placeholder creation
@@ -42,7 +42,7 @@ public class Slot: ContainerBase, IDropHandler, IPointerEnterHandler, IPointerEx
     {
         //Drop can happen somewhere else before this function trigger (then it needs to destroy the placeholder anyway)
         //Triggered when a object being dragged exits this area
-        /* if (eventData.pointerDrag != null)
+        if (eventData.pointerDrag != null)
         {
             Draggable dragComp = eventData.pointerDrag.GetComponent<Draggable>();
             if(dragComp == null){
@@ -50,8 +50,19 @@ public class Slot: ContainerBase, IDropHandler, IPointerEnterHandler, IPointerEx
                 return;
             }
             //Destroy the placeholder object (if it exists)
-        } */
-        DestroyPlaceholder(this);
+            DestroyPlaceholder(dragComp);
+        }
     }
-    
+
+    internal override void CreatePlaceholder<T>(T tObj)
+    {
+        base.CreatePlaceholder(tObj);
+        EventManager.Instance.OnEndDrag += DestroyPlaceholder;
+    }
+
+    internal override void DestroyPlaceholder<T>(T tObj)
+    {
+        base.DestroyPlaceholder(tObj);
+        EventManager.Instance.OnEndDrag -= DestroyPlaceholder;
+    }
 }

@@ -22,7 +22,7 @@ public class ContainerBase : MonoBehaviour
     internal virtual void CreatePlaceholder<T>(T tObj)
     where T : Component
     {
-        if(tObj == null) return;
+        //if(tObj == null) return;
         if (placeholderPrefab == null) return;
         placeholder = Instantiate(placeholderPrefab,
                                   new Vector3(transform.position.x, transform.position.y, transform.position.z - 1),
