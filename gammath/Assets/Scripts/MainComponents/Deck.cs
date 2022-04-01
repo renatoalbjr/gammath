@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class DeckManager : ContainerBase//, IPointerClickHandler
+public class Deck : ContainerBase//, IPointerClickHandler
 {
     public override void Start()
     {

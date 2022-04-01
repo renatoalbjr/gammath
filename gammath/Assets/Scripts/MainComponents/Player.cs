@@ -14,3 +14,14 @@ public class Player : MonoBehaviour
         Debug.Log(rank.Description());
     }
 }
+
+public enum Rank
+{
+    Pre,
+    Fundamental,
+    Medio,
+    Graduado,
+    Mestre,
+    Doutor,
+    PosDoutor
+}

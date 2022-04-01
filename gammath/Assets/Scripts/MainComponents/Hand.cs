@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class HandManager : Slot
+public class Hand : Slot
 {
     private Camera mainCam;
 

@@ -15,9 +15,9 @@ public class EventManager : MonoBehaviour
     public static EventManager Instance;
 
     #region Player input events
-    public event Action<DraggableCard> OnBeginCardDrag;
+    public event Action<Card> OnBeginCardDrag;
     public event Action<CardSlot, Draggable> OnDropOnCardSlot;
-    public event Action<HandManager, Draggable> OnDropOnHand;
+    public event Action<Hand, Draggable> OnDropOnHand;
     #endregion
 
     #region Game state events
@@ -53,14 +53,14 @@ public class EventManager : MonoBehaviour
 
     #region Invoke Methods
     #region Player events
-    public void StartBeginCardDrag(DraggableCard dragComp){
+    public void StartBeginCardDrag(Card dragComp){
         OnBeginCardDrag?.Invoke(dragComp);
     }
     public void StartDropOnCardSlot(CardSlot cardSlot, Draggable draggableObject){
         OnDropOnCardSlot?.Invoke(cardSlot, draggableObject);
     }
 
-    public void StartDropOnHand(HandManager hand, Draggable draggableObject){
+    public void StartDropOnHand(Hand hand, Draggable draggableObject){
         OnDropOnHand?.Invoke(hand, draggableObject);
     }
     #endregion

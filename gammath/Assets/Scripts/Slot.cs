@@ -37,10 +37,12 @@ public class Slot: ContainerBase, IDropHandler, IPointerEnterHandler, IPointerEx
     }
 
     //Handle placeholder deletion
+    //Bug Found: Somehow the user can stop dragging and drop in another position after PointerEnter but before PointerExit
     public virtual void OnPointerExit(PointerEventData eventData)
     {
+        //Drop can happen somewhere else before this function trigger (then it needs to destroy the placeholder anyway)
         //Triggered when a object being dragged exits this area
-        if (eventData.pointerDrag != null)
+        /* if (eventData.pointerDrag != null)
         {
             Draggable dragComp = eventData.pointerDrag.GetComponent<Draggable>();
             if(dragComp == null){
@@ -48,8 +50,8 @@ public class Slot: ContainerBase, IDropHandler, IPointerEnterHandler, IPointerEx
                 return;
             }
             //Destroy the placeholder object (if it exists)
-            DestroyPlaceholder(dragComp);
-        }
+        } */
+        DestroyPlaceholder(this);
     }
     
 }

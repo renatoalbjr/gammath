@@ -274,7 +274,7 @@ public class GameManager : MonoBehaviour
     #region Validates a card drag
     // ########################################################################################## //
 
-    private void _cardBeginDragHandler(DraggableCard dragComp){
+    private void _cardBeginDragHandler(Card dragComp){
         if(dragComp){
             dragComp.canDrag = true;
         }

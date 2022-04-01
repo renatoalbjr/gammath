@@ -34,7 +34,7 @@ public class ContainerBase : MonoBehaviour
     internal virtual void DestroyPlaceholder<T>(T tObj)
     where T : Component
     {
-        if(tObj == null) return;
+        //if(tObj == null) return;
         if (placeholder == null) return;
         Destroy(placeholder.gameObject);
     }
