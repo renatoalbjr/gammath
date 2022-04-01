@@ -5,7 +5,7 @@ using UnityEngine;
 public class SceneManager : MonoBehaviour
 {
     #region Variables
-    public static SceneManager Instance;
+    public static SceneManager Instance { get; private set; }
     #endregion
 
     // ########################################################################################## //

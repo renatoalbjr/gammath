@@ -12,7 +12,7 @@ using System;
 public class EventManager : MonoBehaviour 
 {
     #region Variables
-    public static EventManager Instance;
+    public static EventManager Instance { get; private set; }
 
     #region Player input events
     public event Action<Card> OnBeginCardDrag;

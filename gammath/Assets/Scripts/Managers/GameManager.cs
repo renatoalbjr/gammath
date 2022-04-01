@@ -6,7 +6,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     #region Variables
-    public static GameManager Instance;
+    public static GameManager Instance { get; private set; }
 
     // ---Serialized variables---
     [SerializeField] private Player _playerOne;
