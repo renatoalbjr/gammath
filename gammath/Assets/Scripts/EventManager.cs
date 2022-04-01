@@ -3,15 +3,25 @@ using System;
 
 public class EventManager : MonoBehaviour 
 {
-    public static EventManager current;
+    public static EventManager Instance;
     public event Action<DraggableCard> OnBeginCardDrag;
     public event Action<CardSlot, Draggable> OnDropOnCardSlot;
     public event Action<HandManager, Draggable> OnDropOnHand;
 
-    private void Awake()
+    public event Action OnGameStateChange;
+    public event Action OnTurnOwnerChange;
+    public event Action OnTurnStageChange;
+    public event Action OnGameOver;
+    public event Action OnSceneUnload;
+    public event Action OnAttack;
+
+    //Undestanding how those actions are invoked
+    //public event Action LoopTester;
+
+    void Awake()
     {
-        if(current == null)
-            current = this;
+        if(Instance == null)
+            Instance = this;
         else
             Destroy(gameObject);
 
@@ -27,5 +37,29 @@ public class EventManager : MonoBehaviour
 
     public void StartDropOnHand(HandManager hand, Draggable draggableObject){
         OnDropOnHand?.Invoke(hand, draggableObject);
+    }
+
+    public void StartGameStateChange(){
+        OnGameStateChange?.Invoke();
+    }
+
+    public void StartTurnOwnerChange(){
+        OnTurnOwnerChange?.Invoke();
+    }
+
+    public void StartTurnStageChange(){
+        OnTurnStageChange?.Invoke();
+    }
+
+    public void StartGameOver(){
+        OnGameOver?.Invoke();
+    }
+
+    public void StartSceneUnload(){
+        OnSceneUnload?.Invoke();
+    }
+
+    public void StartAtack(){
+        OnAttack?.Invoke();
     }
 }

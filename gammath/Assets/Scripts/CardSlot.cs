@@ -7,6 +7,6 @@ public class CardSlot : Slot
 {
     internal override void ValidateCanPlace<T>(T tObj)
     {
-        EventManager.current.StartDropOnCardSlot(this, tObj.GetComponent<Draggable>());
+        EventManager.Instance.StartDropOnCardSlot(this, tObj.GetComponent<Draggable>());
     }
 }
