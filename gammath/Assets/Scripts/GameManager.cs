@@ -6,20 +6,20 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     #region Variables
-    public GameManager Instance;
+    public static GameManager Instance;
 
     // ---Serialized variables---
-    [SerializeField] private Player playerOne;
-    [SerializeField] private Player playerTwo;
-    [SerializeField] private int turnCounterLimit;
-    [SerializeField] private int turnTimeLimit;
+    [SerializeField] private Player _playerOne;
+    [SerializeField] private Player _playerTwo;
+    [SerializeField] private int _turnCounterLimit;
+    [SerializeField] private int _turnTimeLimit;
 
     // ---Internal use variables---
-    private GameState gameState;
-    private TurnOwner turnOwner;
-    private TurnStage turnStage;
-    private int turnCounter;
-    private Stopwatch turnStopwatch;
+    private GameState _gameState;
+    private TurnOwner _turnOwner;
+    private TurnStage _turnStage;
+    private int _turnCounter;
+    private Stopwatch _turnStopwatch;
     #endregion
 
     // ########################################################################################## //
@@ -39,11 +39,11 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
 
         // ---Initialize intenal use variables---
-        gameState = GameState.Loading;
-        turnOwner = TurnOwner.None;
-        turnStage = TurnStage.None;
-        turnCounter = 1;
-        turnStopwatch = new Stopwatch();
+        _gameState = GameState.Loading;
+        _turnOwner = TurnOwner.None;
+        _turnStage = TurnStage.None;
+        _turnCounter = 1;
+        _turnStopwatch = new Stopwatch();
     }
     #endregion
 
@@ -53,27 +53,27 @@ public class GameManager : MonoBehaviour
     void OnEnable()
     {
         // ---Subscribe methods to events---
-        EventManager.Instance.OnBeginCardDrag += CardBeginDragHandler;
-        EventManager.Instance.OnDropOnCardSlot += DropOnCardSlotHandler;
+        EventManager.Instance.OnBeginCardDrag += _cardBeginDragHandler;
+        EventManager.Instance.OnDropOnCardSlot += _dropOnCardSlotHandler;
 
-        EventManager.Instance.OnGameStateChange += GameStateUpdater;
-        EventManager.Instance.OnTurnOwnerChange += TurnUpdater;
-        EventManager.Instance.OnTurnStageChange += TurnStageUpdater;
+        EventManager.Instance.OnGameStateChange += _gameStateChangeHandler;
+        EventManager.Instance.OnTurnOwnerChange += _turnOwnerChangeHandler;
+        EventManager.Instance.OnTurnStageChange += _turnStageChangeHandler;
     }
     #endregion
 
     #region OnDisable
     // ########################################################################################## //
 
-    private void OnDisable()
+    void OnDisable()
     {
         // ---Unsubscribe methods to events---
-        EventManager.Instance.OnBeginCardDrag -= CardBeginDragHandler;
-        EventManager.Instance.OnDropOnCardSlot -= DropOnCardSlotHandler;
+        EventManager.Instance.OnBeginCardDrag -= _cardBeginDragHandler;
+        EventManager.Instance.OnDropOnCardSlot -= _dropOnCardSlotHandler;
 
-        EventManager.Instance.OnGameStateChange -= GameStateUpdater;
-        EventManager.Instance.OnTurnOwnerChange -= TurnUpdater;
-        EventManager.Instance.OnTurnStageChange -= TurnStageUpdater;
+        EventManager.Instance.OnGameStateChange -= _gameStateUpdater;
+        EventManager.Instance.OnTurnOwnerChange -= _turnOwnerUpdater;
+        EventManager.Instance.OnTurnStageChange -= _turnStageUpdater;
     }
     #endregion
 
@@ -82,7 +82,7 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        UnityEngine.Debug.Log("GameManager :: Start() :: The game state is now "+gameState.ToString());
+        UnityEngine.Debug.Log("GameManager :: Start() :: The game state is now "+_gameState.ToString());
     }
     #endregion
 
@@ -91,7 +91,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        if(turnStopwatch.Elapsed.Seconds >= turnTimeLimit)
+        if(_turnStopwatch.Elapsed.Seconds >= _turnTimeLimit)
             EventManager.Instance.StartTurnStageChange();
     }
     #endregion
@@ -111,19 +111,19 @@ public class GameManager : MonoBehaviour
     /// The Battle state starts just after Loading, and should end after TurnUpdater triggers OnGameStateChange for the first time.
     /// After End starts, it should trigger OnEndGame that should handle the control back to SceneManager
     /// </remarks>
-    private void GameStateUpdater(){
+    private void _gameStateUpdater(){
 
-        switch (gameState)
+        switch (_gameState)
         {
             case GameState.Loading:
-                gameState = GameState.Battle;
-                UnityEngine.Debug.Log("The game state is now "+gameState.ToString());
+                _gameState = GameState.Battle;
+                UnityEngine.Debug.Log("The game state is now "+_gameState.ToString());
                 EventManager.Instance.StartTurnOwnerChange();
                 break;
 
             case GameState.Battle:
-                gameState = GameState.GameOver;
-                UnityEngine.Debug.Log("The game state is now "+gameState.ToString());
+                _gameState = GameState.GameOver;
+                UnityEngine.Debug.Log("The game state is now "+_gameState.ToString());
                 EventManager.Instance.StartGameOver();
                 break;
 
@@ -149,40 +149,40 @@ public class GameManager : MonoBehaviour
     /// On every call, calls CheckEndGameConditions
     /// If it returns true, then trigger OnGameStateChange, and updates to None.
 	/// </remarks>
-    private void TurnUpdater(){
-        switch (turnOwner)
+    private void _turnOwnerUpdater(){
+        switch (_turnOwner)
         {
             //After Initializing
             case TurnOwner.None:
-                turnOwner = TurnOwner.PlayerOne;
-                UnityEngine.Debug.Log("Now is "+turnOwner.ToString()+" turn");
+                _turnOwner = TurnOwner.PlayerOne;
+                UnityEngine.Debug.Log("Now is "+_turnOwner.ToString()+" turn");
                 EventManager.Instance.StartTurnStageChange();
                 break;
 
             //After PlayerOne
             case TurnOwner.PlayerOne:
-                if(checkGameOverConditions()){
-                    UnityEngine.Debug.Log("GameOver: The winner is "+turnOwner.ToString());
+                if(_checkGameOverConditions()){
+                    UnityEngine.Debug.Log("GameOver: The winner is "+_turnOwner.ToString());
                     EventManager.Instance.StartGameStateChange();
                 }
                 else{
-                    turnOwner = TurnOwner.PlayerTwo;
-                    UnityEngine.Debug.Log("Now is "+turnOwner.ToString()+" turn");
+                    _turnOwner = TurnOwner.PlayerTwo;
+                    UnityEngine.Debug.Log("Now is "+_turnOwner.ToString()+" turn");
                     EventManager.Instance.StartTurnStageChange();
                 }
                 break;
 
             //After PlayerTwo
             case TurnOwner.PlayerTwo:
-                UnityEngine.Debug.Log("The turn "+turnCounter.ToString()+" have finished");
-                turnCounter++;
-                if(checkGameOverConditions()){
-                    UnityEngine.Debug.Log("GameOver: The winner is "+turnOwner.ToString());
+                UnityEngine.Debug.Log("The turn "+_turnCounter.ToString()+" have finished");
+                _turnCounter++;
+                if(_checkGameOverConditions()){
+                    UnityEngine.Debug.Log("GameOver: The winner is "+_turnOwner.ToString());
                     EventManager.Instance.StartGameStateChange();
                 }
                 else{
-                    turnOwner = TurnOwner.PlayerOne;
-                    UnityEngine.Debug.Log("Now is "+turnOwner.ToString()+" turn");
+                    _turnOwner = TurnOwner.PlayerOne;
+                    UnityEngine.Debug.Log("Now is "+_turnOwner.ToString()+" turn");
                     EventManager.Instance.StartTurnStageChange();
                 }
                 break;
@@ -206,32 +206,32 @@ public class GameManager : MonoBehaviour
     /// And triggered by the End Turn button on UI (During PlacingStage)
     /// Those triggers on PlacingStage are enabled with a validator inside the PlacingStage case
 	/// </remarks>
-    private void TurnStageUpdater(){
+    private void _turnStageUpdater(){
         //~And also triggered by itself~ (Wrong, it depends on other triggers that happens mostly during PlacingStage)
 
-        switch (turnStage)
+        switch (_turnStage)
         {
             //After TurnChange
             case TurnStage.None:
-                turnStage = TurnStage.PlacingStage;
-                turnStopwatch.Start();
-                UnityEngine.Debug.Log("The "+turnOwner.ToString()+" turn stage is now "+turnStage.ToString());
+                _turnStage = TurnStage.PlacingStage;
+                _turnStopwatch.Start();
+                UnityEngine.Debug.Log("The "+_turnOwner.ToString()+" turn stage is now "+_turnStage.ToString());
                 break;
 
             //After PlacingStage
             case TurnStage.PlacingStage:
                 //Validates the OnTurnStageChange trigger
-                turnStage = TurnStage.AtackStage;
-                turnStopwatch.Stop();
-                turnStopwatch.Reset();
-                UnityEngine.Debug.Log("The "+turnOwner.ToString()+" turn stage is now "+turnStage.ToString());
+                _turnStage = TurnStage.AtackStage;
+                _turnStopwatch.Stop();
+                _turnStopwatch.Reset();
+                UnityEngine.Debug.Log("The "+_turnOwner.ToString()+" turn stage is now "+_turnStage.ToString());
                 EventManager.Instance.StartAtack();
                 break;
 
             //After AttackStage
             case TurnStage.AtackStage:
-                turnStage = TurnStage.None;
-                UnityEngine.Debug.Log("The "+turnOwner.ToString()+" turn have finished");
+                _turnStage = TurnStage.None;
+                UnityEngine.Debug.Log("The "+_turnOwner.ToString()+" turn have finished");
                 EventManager.Instance.StartTurnOwnerChange();
                 break;
         }
@@ -242,7 +242,7 @@ public class GameManager : MonoBehaviour
     // ########################################################################################## //
 
     //A player can only take action on it's cards
-    private bool checkOwnership(){
+    private bool _checkOwnership(){
         return true;
     }
     #endregion
@@ -251,7 +251,7 @@ public class GameManager : MonoBehaviour
     // ########################################################################################## //
 
     //A player can only play on it's turn
-    private bool checkTurn(){
+    private bool _checkTurn(){
         //Locally, a action is always triggered by the current turn player
         //Since we are not supporting multiple inputs
         //In Online mode, every call to the server will have to be marked by the client with its player
@@ -263,8 +263,8 @@ public class GameManager : MonoBehaviour
     #region Check conditions for the GameOver
     // ########################################################################################## //
 
-    private bool checkGameOverConditions(){
-        if(turnCounter > turnCounterLimit) return true;
+    private bool _checkGameOverConditions(){
+        if(_turnCounter > _turnCounterLimit) return true;
         return false;
     }
     #endregion
@@ -274,7 +274,7 @@ public class GameManager : MonoBehaviour
     #region Validates a card drag
     // ########################################################################################## //
 
-    private void CardBeginDragHandler(DraggableCard dragComp){
+    private void _cardBeginDragHandler(DraggableCard dragComp){
         if(dragComp){
             dragComp.canDrag = true;
         }
@@ -284,11 +284,35 @@ public class GameManager : MonoBehaviour
     #region Validates a card drop
     // ########################################################################################## //
 
-    private void DropOnCardSlotHandler(CardSlot cardSlot, Draggable dragComp){
+    private void _dropOnCardSlotHandler(CardSlot cardSlot, Draggable dragComp){
         if(cardSlot != null){
             if(cardSlot.filledCapacity+1 <= cardSlot.maxCapacity)
                 cardSlot.canPlace = true;
         }
+    }
+    #endregion
+
+    #region Validates OnGameStateChange event
+    // ########################################################################################## //
+
+    private void _gameStateChangeHandler(){
+        _gameStateUpdater();
+    }
+    #endregion
+    
+    #region Validates OnTurnOwnerChange event
+    // ########################################################################################## //
+
+    private void _turnOwnerChangeHandler(){
+        _turnOwnerUpdater();
+    }
+    #endregion
+
+    #region Validates OnturnStageChange event
+    // ########################################################################################## //
+
+    private void _turnStageChangeHandler(){
+        _turnStageUpdater();
     }
     #endregion
 

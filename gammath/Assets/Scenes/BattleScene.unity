@@ -408,7 +408,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 107.27, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 214.54, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &51338770
@@ -635,7 +635,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 107.27, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 214.54, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &73992117
@@ -1424,10 +1424,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e74111ae39f3b643a9623fe7d4d39fd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerOne: {fileID: 303734930179282613}
-  playerTwo: {fileID: 660601255}
-  turnCounterLimit: 4
-  turnTimeLimit: 10
+  _playerOne: {fileID: 303734930179282613}
+  _playerTwo: {fileID: 660601255}
+  _turnCounterLimit: 2
+  _turnTimeLimit: 5
 --- !u!4 &181133106
 Transform:
   m_ObjectHideFlags: 0
@@ -4253,7 +4253,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3741786973159782820, guid: def18d487643a2d4fafa91fadba2f773, type: 3}
       propertyPath: m_Name
-      value: Player2
+      value: PlayerTwo
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: def18d487643a2d4fafa91fadba2f773, type: 3}
@@ -12803,7 +12803,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3741786973159782820, guid: def18d487643a2d4fafa91fadba2f773, type: 3}
       propertyPath: m_Name
-      value: Player1
+      value: PlayerOne
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: def18d487643a2d4fafa91fadba2f773, type: 3}
