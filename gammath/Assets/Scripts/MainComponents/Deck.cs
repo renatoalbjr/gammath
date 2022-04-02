@@ -5,13 +5,45 @@ using UnityEngine.EventSystems;
 
 public class Deck : ContainerBase//, IPointerClickHandler
 {
-    public override void Start()
+    #region Variables
+    // ---Spawner variables---
+    [SerializeField] private Player owner;
+    private List<Card> cards;
+    #endregion
+
+    // ########################################################################################## //
+
+    #region Unity Methods
+    #region Start
+    // ########################################################################################## //
+
+    internal override void Start()
     {
         base.Start();
         placeholderPrefab = null; //There shouldn't be a placeholder
         placeholder = null;
         _UpdateLayout(0, transform.childCount);
     }
+    #endregion
+
+    #region Update
+    // ########################################################################################## //
+
+    #endregion
+    #endregion
+
+    #region Overrides
+    internal override void ValidateCanPlace<T>(T tObj)
+    {
+        base.ValidateCanPlace(tObj);
+    }
+
+    //Guarantees that no placeholder will be created
+    internal override bool CreatePlaceholder<T>(T tObj){return false;}
+    #endregion
+
+    #region Update Layout
+    // ########################################################################################## //
 
     private void _UpdateLayout(int firstIndex, int lastIndex){
         if(transform.childCount < 2) return;
@@ -26,9 +58,10 @@ public class Deck : ContainerBase//, IPointerClickHandler
             t.position = new Vector3(t.position.x, t.position.y, -transform.childCount+i);
         }
     }
+    #endregion
 
-    
-
+    #region PlaceAt
+    // ########################################################################################## //
 
     private void _PlaceAt(Transform cardTransform, int index){
         if(cardTransform == null){
@@ -53,19 +86,29 @@ public class Deck : ContainerBase//, IPointerClickHandler
         _PlaceAt(cardTransform, fixedIndex);
         _UpdateLayout(0, fixedIndex);
     }
-
-    public void PlaceTop(Transform cardTransform){
+    public void PlaceAtTop(Transform cardTransform){
         _PlaceAt(cardTransform, 0);
     }
-    public void PlaceBottom(Transform cardTransform){
+    public void PlaceAtBottom(Transform cardTransform){
         _PlaceAt(cardTransform, filledCapacity);
     }
+    #endregion
 
-    //From 0 to filledCapacity-1
-    private void _PlaceRandom(Transform cardTransform, int firstIndex, int lastIndex){
-        int randIndex = Random.Range(firstIndex, lastIndex);
-        _PlaceAt(cardTransform, randIndex);
-    }
+    #region PlaceRandom
+    // ########################################################################################## //
+
+    /// <summary>
+    /// Place a card at a random index between a range
+    /// </summary>
+    /// <param name = "cardTransform">
+    /// The card to be placed
+    /// </param>
+    /// <param name = "firstIndex">
+    /// From 0 to filledCapacity-1
+    /// </param>
+    /// <param name = "lastIndex">
+    /// From 0 to filledCapacity-1
+    /// </param>
     public void PlaceRandom(Transform cardTransform, int topmostIndex, int bottommostIndex){
         _checkIndexes(topmostIndex, bottommostIndex);
         int firstIndex = Mathf.Min(topmostIndex, bottommostIndex, filledCapacity-1);
@@ -73,8 +116,14 @@ public class Deck : ContainerBase//, IPointerClickHandler
 
         _PlaceRandom(cardTransform, firstIndex, lastIndex);
     }
+    private void _PlaceRandom(Transform cardTransform, int firstIndex, int lastIndex){
+        int randIndex = Random.Range(firstIndex, lastIndex);
+        _PlaceAt(cardTransform, randIndex);
+    }
+    #endregion
 
-
+    #region Shuffle
+    // ########################################################################################## //
     public void Shuffle(int topmostIndex, int bottommostIndex){
         _checkIndexes(topmostIndex, bottommostIndex);
         int firstIndex = Mathf.Min(topmostIndex, bottommostIndex, filledCapacity-1);
@@ -88,15 +137,20 @@ public class Deck : ContainerBase//, IPointerClickHandler
             _PlaceRandom(child, firstIndex, lastIndex);
         }
     }
+    #endregion
 
-    internal override void ValidateCanPlace<T>(T tObj)
-    {
-        base.ValidateCanPlace(tObj);
+    #region RemoveAt
+    private void _RemoveAt(int index){
+        Remove(transform.GetChild(index));
     }
+    public void RemoveAt(int index){
+        _checkIndexes(index);
+        int fixedIndex = Mathf.Clamp(index, 0, filledCapacity-1);
+        _RemoveAt(fixedIndex);
+    }
+    #endregion
 
-    //Guarantees that no placeholder will be created
-    internal override void CreatePlaceholder<T>(T tObj){}
-
+    #region Debug printers
     private void _checkIndexes(int topmostIndex, int bottommostIndex){
 
         if(   topmostIndex    < 0 || topmostIndex    >= filledCapacity
@@ -117,13 +171,6 @@ public class Deck : ContainerBase//, IPointerClickHandler
         if(index < 0 || index >= filledCapacity)
             Debug.Log("Invalid index passed to DeckManager, index = " + index.ToString());
     }
+    #endregion
 
-    private void _RemoveAt(int index){
-        Remove(transform.GetChild(index));
-    }
-    public void RemoveAt(int index){
-        _checkIndexes(index);
-        int fixedIndex = Mathf.Clamp(index, 0, filledCapacity-1);
-        _RemoveAt(fixedIndex);
-    }
 }

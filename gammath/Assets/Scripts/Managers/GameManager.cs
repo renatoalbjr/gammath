@@ -36,7 +36,7 @@ public class GameManager : MonoBehaviour
         isSubscribed = true;
 
         // ---Subscribe methods to events---
-        EventManager.Instance.OnBeginCardDrag += _cardBeginDragHandler;
+        EventManager.Instance.OnBeginDrag += _cardBeginDragHandler;
         EventManager.Instance.OnDropOnCardSlot += _dropOnCardSlotHandler;
 
         EventManager.Instance.OnGameStateChange += _gameStateChangeHandler;
@@ -50,7 +50,7 @@ public class GameManager : MonoBehaviour
         isSubscribed = false;
 
         // ---Unsubscribe methods to events---
-        EventManager.Instance.OnBeginCardDrag -= _cardBeginDragHandler;
+        EventManager.Instance.OnBeginDrag -= _cardBeginDragHandler;
         EventManager.Instance.OnDropOnCardSlot -= _dropOnCardSlotHandler;
 
         EventManager.Instance.OnGameStateChange -= _gameStateUpdater;
@@ -302,11 +302,12 @@ public class GameManager : MonoBehaviour
     #endregion
 
     // ---Validators---
+    // ---Validates player actions---
 
     #region Validates a card drag
     // ########################################################################################## //
 
-    private void _cardBeginDragHandler(Card dragComp){
+    private void _cardBeginDragHandler(Draggable dragComp){
         if(dragComp){
             dragComp.canDrag = true;
         }

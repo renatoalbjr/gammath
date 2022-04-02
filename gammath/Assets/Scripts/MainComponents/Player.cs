@@ -2,16 +2,36 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ExtensionMethods;
+using UnityEngine.UI;
+using System;
 
 public class Player : MonoBehaviour
 {
-    internal string username;
-    internal Rank rank;
-    internal Sprite profilePic;
+    [SerializeField] private string username;
+    [SerializeField] private Rank rank;
+    [SerializeField] private Sprite profilePic;
+    [SerializeField] private List<Card> deckData;
+    [SerializeField] private Deck deck;
+
+    [SerializeField] private TMPro.TMP_Text usernameText;
+    [SerializeField] private TMPro.TMP_Text rankText;
+    [SerializeField] private Image profileImage;
 
     public void Start(){
-        rank = Rank.Pre;
-        Debug.Log(rank.Description());
+        usernameText.text = username;
+        rankText.text = rank.Description();
+        profileImage.sprite = profilePic;
+
+        SpawnCards(deckData, deck);
+    }
+
+    private void SpawnCards(List<Card> deckData, Deck deck)
+    {
+        foreach (var item in deckData)
+        {
+            Card c = Instantiate(item);
+            deck.PlaceAtTop(c.transform);
+        }
     }
 }
 

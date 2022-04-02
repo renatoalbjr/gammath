@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &3832110858443800077
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: -1525713548546570053, guid: 929ba372506ecfb4b9dcd19bf842b34f, type: 3}
+      propertyPath: cardData
+      value: 
+      objectReference: {fileID: 11400000, guid: 7dd8d5b41e247c046b927a65e50d3e3d, type: 2}
+    - target: {fileID: 8210724582571717592, guid: 929ba372506ecfb4b9dcd19bf842b34f, type: 3}
+      propertyPath: m_Name
+      value: Card3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8210724582571717594, guid: 929ba372506ecfb4b9dcd19bf842b34f, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 7643fa896f9125d4b8ddd799c8163448, type: 3}
+    - target: {fileID: 8210724582571717595, guid: 929ba372506ecfb4b9dcd19bf842b34f, type: 3}
+      propertyPath: m_RootOrder
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8210724582571717595, guid: 929ba372506ecfb4b9dcd19bf842b34f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8210724582571717595, guid: 929ba372506ecfb4b9dcd19bf842b34f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8210724582571717595, guid: 929ba372506ecfb4b9dcd19bf842b34f, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 929ba372506ecfb4b9dcd19bf842b34f, type: 3}
