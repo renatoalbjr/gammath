@@ -12,7 +12,7 @@ using System;
 public class EventManager : MonoBehaviour 
 {
     #region Variables
-    public static EventManager Instance { get; private set; }
+    internal static EventManager Instance { get; private set; }
 
     #region Player input events
     public event Action<Card> OnBeginCardDrag;
@@ -39,6 +39,7 @@ public class EventManager : MonoBehaviour
 
     void Awake()
     {
+        Debug.Log("Game Object: "+gameObject.name);
         // ---Singleton Implementation---
         if(Instance == null)
             Instance = this;

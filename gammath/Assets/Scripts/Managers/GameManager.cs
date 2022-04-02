@@ -23,6 +23,42 @@ public class GameManager : MonoBehaviour
     #endregion
 
     // ########################################################################################## //
+
+    #region EventManager Subscriber/Unsubscriber
+    // ########################################################################################## //
+
+    ///<summary>Horrible piece of boilerplate code to get around unity's random awkening order</summary>
+    private bool isSubscribed = false;
+    ///<summary>Horrible piece of boilerplate code to get around unity's random awkening order</summary>
+    private bool _tryToSubscribe(){
+        if(isSubscribed) return false;
+        if(EventManager.Instance == null) return false;
+        isSubscribed = true;
+
+        // ---Subscribe methods to events---
+        EventManager.Instance.OnBeginCardDrag += _cardBeginDragHandler;
+        EventManager.Instance.OnDropOnCardSlot += _dropOnCardSlotHandler;
+
+        EventManager.Instance.OnGameStateChange += _gameStateChangeHandler;
+        EventManager.Instance.OnTurnOwnerChange += _turnOwnerChangeHandler;
+        EventManager.Instance.OnTurnStageChange += _turnStageChangeHandler;
+        return true;
+    }
+    ///<summary>Horrible piece of boilerplate code to get around unity's random awkening order</summary>
+    private bool _tryToUnsubscribe(){
+        if(EventManager.Instance == null) return false;
+        isSubscribed = false;
+
+        // ---Unsubscribe methods to events---
+        EventManager.Instance.OnBeginCardDrag -= _cardBeginDragHandler;
+        EventManager.Instance.OnDropOnCardSlot -= _dropOnCardSlotHandler;
+
+        EventManager.Instance.OnGameStateChange -= _gameStateUpdater;
+        EventManager.Instance.OnTurnOwnerChange -= _turnOwnerUpdater;
+        EventManager.Instance.OnTurnStageChange -= _turnStageUpdater;
+        return true;
+    }
+    #endregion
     
     #region Unity Methods
     #region Awake
@@ -30,6 +66,10 @@ public class GameManager : MonoBehaviour
 
     void Awake()
     {
+        UnityEngine.Debug.Log("Game Object: "+gameObject.name);
+        
+        isSubscribed = false;
+        
         // ---Singleton Implementation---
         if(Instance == null)
             Instance = this;
@@ -52,13 +92,9 @@ public class GameManager : MonoBehaviour
 
     void OnEnable()
     {
-        // ---Subscribe methods to events---
-        EventManager.Instance.OnBeginCardDrag += _cardBeginDragHandler;
-        EventManager.Instance.OnDropOnCardSlot += _dropOnCardSlotHandler;
-
-        EventManager.Instance.OnGameStateChange += _gameStateChangeHandler;
-        EventManager.Instance.OnTurnOwnerChange += _turnOwnerChangeHandler;
-        EventManager.Instance.OnTurnStageChange += _turnStageChangeHandler;
+        _tryToSubscribe();
+        
+        UnityEngine.Debug.Log("Game Object: "+gameObject.name);
     }
     #endregion
 
@@ -67,13 +103,7 @@ public class GameManager : MonoBehaviour
 
     void OnDisable()
     {
-        // ---Unsubscribe methods to events---
-        EventManager.Instance.OnBeginCardDrag -= _cardBeginDragHandler;
-        EventManager.Instance.OnDropOnCardSlot -= _dropOnCardSlotHandler;
-
-        EventManager.Instance.OnGameStateChange -= _gameStateUpdater;
-        EventManager.Instance.OnTurnOwnerChange -= _turnOwnerUpdater;
-        EventManager.Instance.OnTurnStageChange -= _turnStageUpdater;
+        _tryToUnsubscribe();
     }
     #endregion
 
@@ -82,6 +112,8 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
+        _tryToSubscribe();
+        UnityEngine.Debug.Log("Game Object: "+gameObject.name);
         UnityEngine.Debug.Log("GameManager :: Start() :: The game state is now "+_gameState.ToString());
     }
     #endregion

@@ -10,11 +10,45 @@ public class SceneManager : MonoBehaviour
 
     // ########################################################################################## //
 
+    #region EventManager Subscriber/Unsubscriber
+    // ########################################################################################## //
+
+    ///<summary>Horrible piece of boilerplate code to get around unity's random awkening order</summary>
+    private bool isSubscribed = false;
+    ///<summary>Horrible piece of boilerplate code to get around unity's random awkening order</summary>
+    private bool _tryToSubscribe(){
+        if(isSubscribed) return false;
+        if(EventManager.Instance == null) return false;
+        isSubscribed = true;
+
+        // ---Subscribe methods to events---
+        EventManager.Instance.OnGameOver += EndGameAnimations;
+        EventManager.Instance.OnSceneUnload += SceneUnloader;
+        EventManager.Instance.OnAttack += Attack;
+        return true;
+    }
+    ///<summary>Horrible piece of boilerplate code to get around unity's random awkening order</summary>
+    private bool _tryToUnsubscribe(){
+        if(EventManager.Instance == null) return false;
+        isSubscribed = false;
+
+        // ---Unsubscribe methods to events---
+        EventManager.Instance.OnGameOver -= EndGameAnimations;
+        EventManager.Instance.OnSceneUnload -= SceneUnloader;
+        EventManager.Instance.OnAttack -= Attack;
+        return true;
+    }
+    #endregion
+
     #region Unity Methods
     #region Awake
     // ########################################################################################## //
 
     void Awake(){
+        Debug.Log("Game Object: "+gameObject.name);
+        
+        isSubscribed = false;
+        
         // ---Singleton Implementation---
         if(Instance == null)
             Instance = this;
@@ -29,9 +63,8 @@ public class SceneManager : MonoBehaviour
     // ########################################################################################## //
 
     void OnEnable(){
-        EventManager.Instance.OnGameOver += EndGameAnimations;
-        EventManager.Instance.OnSceneUnload += SceneUnloader;
-        EventManager.Instance.OnAttack += Attack;
+        _tryToSubscribe();
+        Debug.Log("Game Object: "+gameObject.name);
     }
     #endregion
 
@@ -39,9 +72,7 @@ public class SceneManager : MonoBehaviour
     // ########################################################################################## //
 
     void OnDisable(){
-        EventManager.Instance.OnGameOver -= EndGameAnimations;
-        EventManager.Instance.OnSceneUnload -= SceneUnloader;
-        EventManager.Instance.OnAttack -= Attack;
+        _tryToUnsubscribe();
     }
     #endregion
 
@@ -50,6 +81,8 @@ public class SceneManager : MonoBehaviour
 
     void Start()
     {
+        _tryToSubscribe();
+        Debug.Log("Game Object: "+gameObject.name);
         Debug.Log("SceneManager :: Start()");
 
         EventManager.Instance.StartGameStateChange();
