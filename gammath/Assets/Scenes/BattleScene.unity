@@ -6775,7 +6775,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 181133105}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: EndTurnButtonHandler
+        m_MethodName: SurrenderButtonHandler
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

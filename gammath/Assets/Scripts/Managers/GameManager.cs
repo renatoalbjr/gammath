@@ -25,6 +25,7 @@ public class GameManager : MonoBehaviour
     private TurnStage _turnStage;
     private int _turnCounter;
     private Stopwatch _turnStopwatch;
+    private bool hasSurrended;
     #endregion
 
     // ########################################################################################## //
@@ -34,11 +35,13 @@ public class GameManager : MonoBehaviour
 
     ///<summary>Horrible piece of boilerplate code to get around unity's random awkening order</summary>
     private bool isSubscribed = false;
+
     ///<summary>Horrible piece of boilerplate code to get around unity's random awkening order</summary>
     private bool _tryToSubscribe(){
         if(isSubscribed) return false;
         if(EventManager.Instance == null) return false;
         isSubscribed = true;
+        hasSurrended = false;
 
         // ---Subscribe methods to events---
         EventManager.Instance.OnBeginDrag += _beginDragHandler;
@@ -211,9 +214,17 @@ public class GameManager : MonoBehaviour
                     EventManager.Instance.StartGameStateChange();
                 }
                 else{
+                    //Lets treat player A surrender and player B win as one and the same
                     _turnOwner = TurnOwner.PlayerTwo;
                     UnityEngine.Debug.Log("Now is "+_turnOwner.ToString()+" turn");
-                    EventManager.Instance.StartTurnStageChange();
+                    if(hasSurrended){
+                        UnityEngine.Debug.Log("The player "+TurnOwner.PlayerOne+" has surrendered");
+                        UnityEngine.Debug.Log("GameOver: The winner is "+_turnOwner.ToString());
+                        EventManager.Instance.StartGameStateChange();
+                    }
+                    else{
+                        EventManager.Instance.StartTurnStageChange();
+                    }
                 }
                 break;
 
@@ -228,7 +239,14 @@ public class GameManager : MonoBehaviour
                 else{
                     _turnOwner = TurnOwner.PlayerOne;
                     UnityEngine.Debug.Log("Now is "+_turnOwner.ToString()+" turn");
-                    EventManager.Instance.StartTurnStageChange();
+                    if(hasSurrended){
+                        UnityEngine.Debug.Log("The player "+TurnOwner.PlayerTwo+" has surrendered");
+                        UnityEngine.Debug.Log("GameOver: The winner is "+_turnOwner.ToString());
+                        EventManager.Instance.StartGameStateChange();
+                    }
+                    else{
+                        EventManager.Instance.StartTurnStageChange();
+                    }
                 }
                 break;
         }
@@ -398,9 +416,16 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region Validates a click on the surrender button
-    #endregion
 
-    
+    public static void SurrenderButtonHandler(){
+        GameManager instance = GameManager.Instance;
+        if(instance._gameState == GameState.Battle){
+            instance.hasSurrended = true;
+            EndTurnButtonHandler();
+        }
+    }
+
+    #endregion
 
     #region Validates OnGameStateChange event
     // ########################################################################################## //
