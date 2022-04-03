@@ -9,9 +9,10 @@ public class UITurnInfo : MonoBehaviour
     [SerializeField] private TMPro.TMP_Text playerOneTimer;
     [SerializeField] private TMPro.TMP_Text playerTwoTimer;
     [SerializeField] private TMPro.TMP_Text turnCounter;
-    
-    [Range(0f, 1f)]
-    [SerializeField] private float disabledAlfa;
+    [SerializeField] private Image leftArrow;
+    [SerializeField] private Image rightArrow;
+    [SerializeField] private Color enabledColor;
+    [SerializeField] private Color disabledColor;
 
     // Update is called once per frame
     void Update()
@@ -26,27 +27,33 @@ public class UITurnInfo : MonoBehaviour
     }
 
     private void PlayerOneTurn(){
-        // ---Enabled---
-        playerOneTimer.alpha = 1f;
+        // ---Enabled / PlayerOne---
         playerOneTimer.text = GameManager.Instance.GetTurnStageTL().ToString(@"mm\:ss");
-        // ---Diabled---
+        playerOneTimer.color = enabledColor;
+        leftArrow.color = enabledColor;
+        // ---Disabled / PlayerTwo---
         playerTwoTimer.text = GameManager.Instance.GetTurnTimeLimit().ToString(@"mm\:ss");
-        playerTwoTimer.alpha = disabledAlfa;
+        playerTwoTimer.color = disabledColor;
+        rightArrow.color = disabledColor;
     }
     private void PlayerTwoTurn(){
-        // ---Enabled---
-        playerTwoTimer.alpha = 1f;
+        // ---Enabled / PlayerTwo---
         playerTwoTimer.text = GameManager.Instance.GetTurnStageTL().ToString(@"mm\:ss");
-        // ---Diabled---
+        playerTwoTimer.color = enabledColor;
+        rightArrow.color = enabledColor;
+        // ---Disabled / PlayerOne---
         playerOneTimer.text = GameManager.Instance.GetTurnTimeLimit().ToString(@"mm\:ss");
-        playerOneTimer.alpha = disabledAlfa;
+        playerOneTimer.color = disabledColor;
+        leftArrow.color = disabledColor;
     }
     private void NoneTurn(){
-        // ---Diabled---
+        // ---Disabled / PlayerOne---
         playerOneTimer.text = GameManager.Instance.GetTurnTimeLimit().ToString(@"mm\:ss");
-        playerOneTimer.alpha = disabledAlfa;
-        // ---Diabled---
+        playerOneTimer.color = disabledColor;
+        leftArrow.color = disabledColor;
+        // ---Disabled / PlayerTwo---
         playerTwoTimer.text = GameManager.Instance.GetTurnTimeLimit().ToString(@"mm\:ss");
-        playerTwoTimer.alpha = disabledAlfa;
+        playerTwoTimer.color = disabledColor;
+        rightArrow.color = disabledColor;
     }
 }
