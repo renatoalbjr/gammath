@@ -421,6 +421,30 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
+    #region Public utilities
+
+    public System.TimeSpan GetTurnStageET(){
+        return GameManager.Instance._turnStopwatch.Elapsed;
+    }
+
+    public System.TimeSpan GetTurnStageTL(){
+        return System.TimeSpan.FromSeconds(_turnTimeLimit) - _turnStopwatch.Elapsed;
+    }
+
+    public TurnOwner GetTurnOwner(){
+        return GameManager.Instance._turnOwner;
+    }
+
+    public System.TimeSpan GetTurnTimeLimit(){
+        return System.TimeSpan.FromSeconds(_turnTimeLimit);
+    }
+
+    public int GetTurnCounter(){
+        return _turnCounter;
+    }
+
+    #endregion
+
 }
 
 #region GameState enum (Loading, Battle, GameOver)
