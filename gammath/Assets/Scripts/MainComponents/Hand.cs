@@ -48,29 +48,33 @@ public class Hand : Slot
         boxCPadding = boxColliderPadding;
 
         // ---Clamps sRelPos values to 0,1---
-        if(sRelPos.x > 1) sRelPos.x = 1;
-        if(sRelPos.y > 1) sRelPos.y = 1;
-        if(sRelPos.x < 0) sRelPos.x = 0;
-        if(sRelPos.y < 0) sRelPos.y = 0;
+        if (sRelPos.x > 1) sRelPos.x = 1;
+        if (sRelPos.y > 1) sRelPos.y = 1;
+        if (sRelPos.x < 0) sRelPos.x = 0;
+        if (sRelPos.y < 0) sRelPos.y = 0;
 
         // ---Resizes the collider---
         boxCollider.size = handSize + new Vector2(boxCPadding.y + boxCPadding.w,
                                                  boxCPadding.x + boxCPadding.z);
+
+        UpdateHandPosition();
         
+        // ---Recenter the box collider applying the given padding---
+        boxCollider.offset = new Vector2(boxCollider.size.x / 2 - (boxCPadding.w + handSize.x / 2),
+                                        boxCollider.size.y / 2 - (boxCPadding.z + handSize.y / 2));
+    }
+
+    private void UpdateHandPosition()
+    {
         // ---Aligns with the given relative coordinates on screen---
         transform.position = mainCam.ScreenToWorldPoint(new Vector3(sRelPos.x * mainCam.scaledPixelWidth,
                                                                     sRelPos.y * mainCam.scaledPixelHeight,
                                                                     0));
-        
+
         // ---Replaces to its proper layer---
         transform.position = new Vector3(transform.position.x + handOffset.x,
                                          transform.position.y + handOffset.y,
                                          -1);
-        
-
-        // ---Recenter the box collider applying the given padding---
-        boxCollider.offset = new Vector2(boxCollider.size.x / 2 - (boxCPadding.w + handSize.x / 2),
-                                        boxCollider.size.y / 2 - (boxCPadding.z + handSize.y / 2));
     }
     #endregion
 
@@ -83,6 +87,7 @@ public class Hand : Slot
         if(lastChildCount != transform.childCount)
             UpdateLayout();
         lastChildCount = transform.childCount;
+        UpdateHandPosition();
     }
     #endregion
     #endregion
