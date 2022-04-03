@@ -58,9 +58,9 @@ public class GameManager : MonoBehaviour
         EventManager.Instance.OnBeginDrag -= _beginDragHandler;
         EventManager.Instance.OnDropOnSlot -= _dropOnSlotHandler;
 
-        EventManager.Instance.OnGameStateChange -= _gameStateUpdater;
-        EventManager.Instance.OnTurnOwnerChange -= _turnOwnerUpdater;
-        EventManager.Instance.OnTurnStageChange -= _turnStageUpdater;
+        EventManager.Instance.OnGameStateChange -= _turnStageChangeHandler;
+        EventManager.Instance.OnTurnOwnerChange -= _turnStageChangeHandler;
+        EventManager.Instance.OnTurnStageChange -= _turnStageChangeHandler;
         return true;
     }
     #endregion
@@ -390,6 +390,11 @@ public class GameManager : MonoBehaviour
     #endregion
 
     #region Validates a click on the end turn button
+    public static void EndTurnButtonHandler(){
+        GameManager instance = GameManager.Instance;
+        if(instance._turnStage == TurnStage.PlacingStage)
+            instance._turnStageChangeHandler();
+    }
     #endregion
 
     #region Validates a click on the surrender button
@@ -413,7 +418,7 @@ public class GameManager : MonoBehaviour
     }
     #endregion
 
-    #region Validates OnturnStageChange event
+    #region Validates OnTurnStageChange event
     // ########################################################################################## //
 
     private void _turnStageChangeHandler(){
