@@ -14,18 +14,32 @@ public class ContainerBase : MonoBehaviour
 
     internal virtual void Start()
     {
-        canPlace = false;
+        canPlace = true;
         filledCapacity = transform.childCount;
     }
 
-    //Instatiate the placeholder with the prefab and parent it to this slot
+    /// <summary>
+    /// Instatiate the placeholder with the prefab and parent it to this slot. If there is no placeholder prefab it doesn't do nothing.
+    /// </summary>
+    /// <param name="tObj">
+    /// A component that will be passed as a parameter to place validation and placeholder initialization
+    /// </param>
     internal virtual bool CreatePlaceholder<T>(T tObj)
     where T : Component
     {
-        //if(tObj == null) return;
-        if (placeholderPrefab == null) return false;
+        // ---If theres no placeholder prefab, don't create it---
+        if(placeholderPrefab == null) return false;
+        
+        // ---Check if can place, by default it can---
         ValidateCanPlace(tObj);
-        if(!canPlace) return false;
+
+        if(!canPlace){
+            // --- Resets canPlace---
+            canPlace = true;
+            return false;
+        }
+        canPlace = true;
+
         placeholder = Instantiate(placeholderPrefab,
                                   new Vector3(transform.position.x, transform.position.y, transform.position.z - 1),
                                   Quaternion.identity,
@@ -34,11 +48,15 @@ public class ContainerBase : MonoBehaviour
         return true;                                  
     }
 
-    //Only destroy the placeholder object
+    /// <summary>
+    /// Destroys the current placeholder
+    /// </summary>
+    /// <param name="tObj">
+    /// A component that might be passed as a parameter to place validation and placeholder initialization
+    /// </param>
     internal virtual void DestroyPlaceholder<T>(T tObj)
     where T : Component
     {
-        //if(tObj == null) return;
         if (placeholder == null) return;
         Destroy(placeholder.gameObject);
     }
@@ -52,10 +70,19 @@ public class ContainerBase : MonoBehaviour
     internal virtual bool Place<T>(T tObj)
     where T : Component
     {
+        // ---If there's nothing to place---
         if(tObj == null) return false;
+
+        // ---Check if can place, by default it can---
         ValidateCanPlace(tObj);
-        if(!canPlace) return false;
-        canPlace = false;
+
+        if(!canPlace){
+            // --- Resets canPlace---
+            canPlace = true;
+            return false;
+        }
+        canPlace = true;
+
         filledCapacity++;
 
         if (placeholder != null)
@@ -71,7 +98,7 @@ public class ContainerBase : MonoBehaviour
             tObj.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - 1);
             tObj.transform.SetParent(transform);
         }
-        //DestroyPlaceholder(tObj);
+        DestroyPlaceholder(tObj);
         return true;
     }
 
@@ -87,11 +114,14 @@ public class ContainerBase : MonoBehaviour
     
     }
 
-    //Check the capacity and the object by default
+    ///<summary>
+    ///Check the capacity and the object by default
+    ///</summary>
     internal virtual void ValidateCanPlace<T>(T tObj)
     where T : Component
     {
-        if (tObj == null) return;
-        if (filledCapacity + 1 <= maxCapacity) canPlace = true;
+        if(tObj == null) return;
+        if(!canPlace) return;
+        if(filledCapacity + 1 > maxCapacity) canPlace = false;
     }
 }

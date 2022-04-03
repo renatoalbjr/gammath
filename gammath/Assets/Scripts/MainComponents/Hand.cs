@@ -26,9 +26,6 @@ public class Hand : Slot
     /// <summary>CSS shorthand style: x = top, y = right, z = bottom, w = left</summary>
     private Vector4 boxCPadding;
     private BoxCollider2D boxCollider;
-    
-    
-
     #endregion
     
     // ########################################################################################## //
@@ -116,6 +113,10 @@ public class Hand : Slot
             t.position = new Vector3(t.position.x, cSize.y/2+updateHeight*i-updateOffset, -childCount+i);
         }
     }
+
     #endregion
+
+    // ---Edit from here---
+
 
 }

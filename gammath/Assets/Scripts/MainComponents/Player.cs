@@ -30,6 +30,7 @@ public class Player : MonoBehaviour
         foreach (var item in deckData)
         {
             Card c = Instantiate(item);
+            c.BelongsTo(this); //Hours to find out that this line was changing item instead of c
             deck.PlaceAtTop(c.transform);
         }
     }

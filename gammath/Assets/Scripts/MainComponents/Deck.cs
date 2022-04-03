@@ -6,14 +6,19 @@ using UnityEngine.EventSystems;
 public class Deck : ContainerBase//, IPointerClickHandler
 {
     #region Variables
-    // ---Spawner variables---
-    [SerializeField] private Player owner;
-    private List<Card> cards;
+    
     #endregion
 
     // ########################################################################################## //
 
     #region Unity Methods
+    
+    #region Awake
+    internal void Awake(){
+        
+    }
+    #endregion
+
     #region Start
     // ########################################################################################## //
 
@@ -22,7 +27,7 @@ public class Deck : ContainerBase//, IPointerClickHandler
         base.Start();
         placeholderPrefab = null; //There shouldn't be a placeholder
         placeholder = null;
-        _UpdateLayout(0, transform.childCount);
+        _UpdateLayout(0, transform.childCount-1);
     }
     #endregion
 
@@ -35,6 +40,7 @@ public class Deck : ContainerBase//, IPointerClickHandler
     #region Overrides
     internal override void ValidateCanPlace<T>(T tObj)
     {
+        // ---Checks if theres room for the object in the container---
         base.ValidateCanPlace(tObj);
     }
 
@@ -47,8 +53,9 @@ public class Deck : ContainerBase//, IPointerClickHandler
 
     private void _UpdateLayout(int firstIndex, int lastIndex){
         if(transform.childCount < 2) return;
+        if(transform.childCount <= lastIndex) return;
 
-        for (int i = firstIndex; i < lastIndex; i++)
+        for (int i = firstIndex; i <= lastIndex; i++)
         {
             Transform t = transform.GetChild(i);
             if(t == null){

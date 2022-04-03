@@ -1,48 +1,52 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
+[RequireComponent(typeof(BoxCollider2D))]
 public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
     internal Camera mainCam;
-    internal Collider2D myCollider;
+    internal Collider2D boxCollider;
     internal Vector3 offset;
     internal Transform originalParent;
     internal Vector3 originalPosition;
     public bool canDrag;
+    public bool dragging;
 
     internal virtual void Awake(){
-        myCollider = GetComponent<Collider2D>();
+        boxCollider = GetComponent<Collider2D>();
         mainCam = Camera.main;
-        canDrag = false;
+        canDrag = true;
+        dragging = false;
     }
 
     public virtual void OnBeginDrag(PointerEventData eventData)
     {
-        StartBeginDragEvent(eventData);
-        if(!canDrag) return;
+        StartBeginDragEvents(eventData);
+        if(!canDrag){
+            canDrag = true;
+            return;
+        }
 
         offset = GetMousePosition(eventData) - transform.position;
         originalParent = transform.parent;
         originalPosition = transform.position;
 
-        if(transform.parent != null)
+        ContainerBase cBase = transform.parent?.GetComponent<ContainerBase>();
+        if(cBase != null){
+            cBase.Remove(this);
+        }
+        else
         {
-            Slot slot = transform.parent.GetComponent<Slot>();
-            if(slot != null){
-                slot.Remove(this);
-            }
-            else
-            {
-                transform.SetParent(null);
-            }
+            transform.parent = null;
         }
 
-        myCollider.enabled = false;
+        dragging = true;
+        boxCollider.enabled = false;
     }
 
     public virtual void OnDrag(PointerEventData eventData)
     {
-        if(!canDrag) return;
+        if(!dragging) return;
 
         Vector3 newPos = GetMousePosition(eventData) - offset;
         Vector3 newPosOnScreen = GetWorldPointInScreenPosition(newPos);
@@ -58,25 +62,28 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
 
     public virtual void OnEndDrag(PointerEventData eventData)
     {
-        EventManager.Instance.StartEndDrag(this);
-        if(transform.parent != null){
-            canDrag = false;
-            myCollider.enabled = true;
-            return;
-        }
-        
-        Slot slot = originalParent?.gameObject?.GetComponent<Slot>();
+        if(!dragging) return; //This is triggered whether the drag is valid or not
 
-        if(slot != null){
-            slot.Place(this);
+
+        dragging = false;
+        boxCollider.enabled = true;
+        
+        // ---Checks if it was placed---
+        if(transform.parent != null) return;
+
+        // ---If the originalParent is a ContainerBase, place it back---
+        // ---Else, reparent and reposition---
+        
+        ContainerBase cBase = originalParent?.gameObject.GetComponent<ContainerBase>();
+
+        if(cBase != null){
+            cBase.Place(this);
         }
         else{
-            transform.position = originalPosition;
             transform.SetParent(originalParent);
+            transform.position = originalPosition;
         }
-        
-        canDrag = false;
-        myCollider.enabled = true;
+
     }
 
     #region Utilities
@@ -88,9 +95,10 @@ public class Draggable : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDra
         return mainCam.WorldToScreenPoint(position);
     }
     #endregion
-    
+
+    //Please don't change above this line (Alway check the box collider on scene editor)
     //Set dragging to true by default
-    internal virtual void StartBeginDragEvent(PointerEventData eventData){
-        canDrag = true;
+    internal virtual void StartBeginDragEvents(PointerEventData eventData){
+        EventManager.Instance.StartBeginDrag(this);
     }
 }

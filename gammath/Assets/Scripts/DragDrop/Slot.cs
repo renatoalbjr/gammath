@@ -1,15 +1,23 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class Slot: ContainerBase, IDropHandler, IPointerEnterHandler, IPointerExitHandler
+public class Slot: ContainerBase, IDropHandler, IPointerEnterHandler, IPointerExitHandler, IBelong
 {
+    private Player owner;
+    public Player BelongsTo(Player p)
+    {
+        Debug.Log(string.Format("{0} now belongs to {1}", gameObject.name, p.gameObject.name));
+        return owner = p;
+    }
+
+    public Player GetOwner()
+    {
+        return owner;
+    }
+
     public virtual void OnDrop(PointerEventData eventData)
     {
-        Draggable dragComp = eventData.pointerDrag.GetComponent<Draggable>();
-        
-        ValidateCanPlace(dragComp);
-        if (canPlace)
-            Place(dragComp); //Unity says OnDrop will always be triggered before OnEndDrag (If so, the placeholder will still exists during this call)
+        Place(eventData.pointerDrag?.GetComponent<Draggable>());
     }
 
     //Handle placeholder creation
@@ -19,14 +27,7 @@ public class Slot: ContainerBase, IDropHandler, IPointerEnterHandler, IPointerEx
         if (eventData.pointerDrag != null)
         {
             Draggable dragComp = eventData.pointerDrag.GetComponent<Draggable>();
-
-            ValidateCanPlace(dragComp);
-            if (canPlace)
-            {
-                canPlace = false;
-                //Create and give away the placeholder object
-                CreatePlaceholder(dragComp);
-            }
+            CreatePlaceholder(dragComp);
         }
     }
 
@@ -36,5 +37,11 @@ public class Slot: ContainerBase, IDropHandler, IPointerEnterHandler, IPointerEx
     {
         //Drop can happen somewhere else before this function trigger (then it needs to destroy the placeholder anyway)
         DestroyPlaceholder(eventData.pointerDrag?.GetComponent<Draggable>());
+    }
+
+    internal override void ValidateCanPlace<T>(T tObj)
+    {
+        base.ValidateCanPlace(tObj);
+        EventManager.Instance.StartDropOnSlot(this, tObj?.GetComponent<Draggable>());
     }
 }

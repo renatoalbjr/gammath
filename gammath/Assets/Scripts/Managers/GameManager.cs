@@ -11,6 +11,11 @@ public class GameManager : MonoBehaviour
     // ---Serialized variables---
     [SerializeField] private Player _playerOne;
     [SerializeField] private Player _playerTwo;
+    [SerializeField] private Field _field;
+    [SerializeField] private Hand _playerOneHand;
+    [SerializeField] private Hand _playerTwoHand;
+    [SerializeField] private Deck _playerOneDeck;
+    [SerializeField] private Deck _playerTwoDeck;
     [SerializeField] private int _turnCounterLimit;
     [SerializeField] private int _turnTimeLimit;
 
@@ -36,8 +41,8 @@ public class GameManager : MonoBehaviour
         isSubscribed = true;
 
         // ---Subscribe methods to events---
-        EventManager.Instance.OnBeginDrag += _cardBeginDragHandler;
-        EventManager.Instance.OnDropOnCardSlot += _dropOnCardSlotHandler;
+        EventManager.Instance.OnBeginDrag += _beginDragHandler;
+        EventManager.Instance.OnDropOnSlot += _dropOnSlotHandler;
 
         EventManager.Instance.OnGameStateChange += _gameStateChangeHandler;
         EventManager.Instance.OnTurnOwnerChange += _turnOwnerChangeHandler;
@@ -50,8 +55,8 @@ public class GameManager : MonoBehaviour
         isSubscribed = false;
 
         // ---Unsubscribe methods to events---
-        EventManager.Instance.OnBeginDrag -= _cardBeginDragHandler;
-        EventManager.Instance.OnDropOnCardSlot -= _dropOnCardSlotHandler;
+        EventManager.Instance.OnBeginDrag -= _beginDragHandler;
+        EventManager.Instance.OnDropOnSlot -= _dropOnSlotHandler;
 
         EventManager.Instance.OnGameStateChange -= _gameStateUpdater;
         EventManager.Instance.OnTurnOwnerChange -= _turnOwnerUpdater;
@@ -84,6 +89,14 @@ public class GameManager : MonoBehaviour
         _turnStage = TurnStage.None;
         _turnCounter = 1;
         _turnStopwatch = new Stopwatch();
+
+        // ---Set Players---
+        _field.SetPlayers(_playerOne, _playerTwo);
+        _playerOneHand.BelongsTo(_playerOne);
+        _playerTwoHand.BelongsTo(_playerTwo);/* 
+        _playerOneDeck.BelongsTo(_playerOne);
+        _playerTwoDeck.BelongsTo(_playerTwo); */
+
     }
     #endregion
 
@@ -193,7 +206,7 @@ public class GameManager : MonoBehaviour
 
             //After PlayerOne
             case TurnOwner.PlayerOne:
-                if(_checkGameOverConditions()){
+                if(CheckGameOverConditions()){
                     UnityEngine.Debug.Log("GameOver: The winner is "+_turnOwner.ToString());
                     EventManager.Instance.StartGameStateChange();
                 }
@@ -208,7 +221,7 @@ public class GameManager : MonoBehaviour
             case TurnOwner.PlayerTwo:
                 UnityEngine.Debug.Log("The turn "+_turnCounter.ToString()+" have finished");
                 _turnCounter++;
-                if(_checkGameOverConditions()){
+                if(CheckGameOverConditions()){
                     UnityEngine.Debug.Log("GameOver: The winner is "+_turnOwner.ToString());
                     EventManager.Instance.StartGameStateChange();
                 }
@@ -273,9 +286,34 @@ public class GameManager : MonoBehaviour
     #region Check Objects Ownership
     // ########################################################################################## //
 
-    //A player can only take action on it's cards
-    private bool _checkOwnership(){
-        return true;
+    //Compares a object Ownership component value with players and return true if they are the same
+    public bool CheckOwnership(Draggable dragComp, Player player){
+        //Check is the player is the owner of dragComp
+        return CheckOwnership(dragComp?.gameObject.GetComponent<Card>(), player); //Making one overload head to another one as long as the parameter is not null
+    }
+    public bool CheckOwnership(Card cardComp, Player player){
+        Player owner = cardComp?.GetOwner();
+        UnityEngine.Debug.Log(owner.gameObject.name);
+
+        // ---The object has no owner---
+        //if(owner == null) return false; If the object has no owner, it means anyone can control it (other object in scene)
+
+        //return owner == player;
+        return CheckTurnOwner(owner); //Until online, assumes that the actioner is the turn owner, then compares it with the card owner
+    }
+    public bool CheckOwnership(Slot slot, Player player){
+        Player owner = slot?.GetOwner();
+
+        /*  In the future, if custom validators are needed for each derived class from a base class
+            the most apropriated approach will be a series of GetComponents, one for each custom derived class.
+            This GetComponents can either lead to other validators overloads, or can be check in the base class overload.
+         */
+
+        // ---The object has no owner---
+        //if(owner == null) return false; If the object has no owner, it means anyone can control it (other object in scene)
+
+        //return owner == player;
+        return CheckTurnOwner(owner); //Until online, assumes that the actioner is the turn owner, then compares it with the card owner
     }
     #endregion
 
@@ -283,21 +321,32 @@ public class GameManager : MonoBehaviour
     // ########################################################################################## //
 
     //A player can only play on it's turn
-    private bool _checkTurn(){
+    public bool CheckTurnOwner(Player player){
         //Locally, a action is always triggered by the current turn player
         //Since we are not supporting multiple inputs
         //In Online mode, every call to the server will have to be marked by the client with its player
         //Then this method will check if the caller is the same as the current turn
-        return true;
+        
+        Player p = null;
+        if(_turnOwner == TurnOwner.PlayerOne){
+            p = _playerOne;
+        }
+        else if(_turnOwner == TurnOwner.PlayerTwo){
+            p = _playerTwo;
+        }
+
+        return p == player;
     }
     #endregion
 
     #region Check conditions for the GameOver
     // ########################################################################################## //
 
-    private bool _checkGameOverConditions(){
-        if(_turnCounter > _turnCounterLimit) return true;
-        return false;
+    public bool CheckGameOverConditions(){
+        if(_turnCounter <= _turnCounterLimit) return false;
+        //Check the score
+        //Check if the surrender button was pressed (the this will only be called next turn, meaning the next player will be the winner);
+        return true;
     }
     #endregion
 
@@ -307,9 +356,12 @@ public class GameManager : MonoBehaviour
     #region Validates a card drag
     // ########################################################################################## //
 
-    private void _cardBeginDragHandler(Draggable dragComp){
+    private void _beginDragHandler(Draggable dragComp){
+        UnityEngine.Debug.Log("Game Manager :: _beginCardDragHandler");
         if(dragComp){
-            dragComp.canDrag = true;
+            if(!dragComp.canDrag) return;
+            // ---Drag will be allowed only during Battle state AND by the objects owner---
+            if(_gameState != GameState.Battle || !CheckOwnership(dragComp, null)) dragComp.canDrag = false;
         }
     }
     #endregion
@@ -317,13 +369,33 @@ public class GameManager : MonoBehaviour
     #region Validates a card drop
     // ########################################################################################## //
 
-    private void _dropOnCardSlotHandler(CardSlot cardSlot, Draggable dragComp){
-        if(cardSlot != null){
-            if(cardSlot.filledCapacity+1 <= cardSlot.maxCapacity)
-                cardSlot.canPlace = true;
+    private void _dropOnSlotHandler(Slot slot, Draggable dragComp){
+        // ---Drop will only be allowed at Battle state---
+        // ---And during the objects owner turn---
+        // ---The objects owner turn breaks down to ownership and turn---
+        if(slot != null){
+            if(!slot.canPlace) return;
+            if(_gameState != GameState.Battle
+               || !CheckOwnership(dragComp, null)
+               || !CheckOwnership(slot, null)
+               || CheckTurnOwner(null)
+               ) 
+               slot.canPlace = false;
         }
     }
     #endregion
+
+    #region Validates a card draw
+    
+    #endregion
+
+    #region Validates a click on the end turn button
+    #endregion
+
+    #region Validates a click on the surrender button
+    #endregion
+
+    
 
     #region Validates OnGameStateChange event
     // ########################################################################################## //
