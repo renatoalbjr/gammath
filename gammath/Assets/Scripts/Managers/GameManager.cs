@@ -83,7 +83,7 @@ public class GameManager : MonoBehaviour
         else
             Destroy(gameObject);
 
-        DontDestroyOnLoad(gameObject);
+        //DontDestroyOnLoad(gameObject);
 
         // ---Initialize intenal use variables---
         _gameState = GameState.Loading;
@@ -139,6 +139,9 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
+        if(_gameState == GameState.Loading){
+            EventManager.Instance.StartGameStateChange();
+        }
         if(_turnStopwatch.Elapsed.Seconds >= _turnTimeLimit)
             EventManager.Instance.StartTurnStageChange();
     }
