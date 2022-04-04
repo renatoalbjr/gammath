@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using UnityEngine;
 
+/// <summary>
+/// Responsible for managing the game flow. The GameUI will trigger events, to which this class will be subscribed to (UnityEvents).
+/// So, when loading a scene it will be responsible for populating the data and controlling.
+/// </summary>
 public class GameManager : MonoBehaviour
 {
     #region Variables
@@ -83,10 +87,10 @@ public class GameManager : MonoBehaviour
         else
             Destroy(gameObject);
 
-        //DontDestroyOnLoad(gameObject);
+        DontDestroyOnLoad(gameObject);
 
         // ---Initialize intenal use variables---
-        _gameState = GameState.Loading;
+        _gameState = GameState.Loading; //StarMenu
         _turnOwner = TurnOwner.None;
         _turnStage = TurnStage.None;
         _turnCounter = 1;
@@ -172,6 +176,8 @@ public class GameManager : MonoBehaviour
                 EventManager.Instance.StartTurnOwnerChange();
                 break;
 
+            /// Client side
+            /// Before starting the battle, initialize its variables with the players
             case GameState.Battle:
                 _gameState = GameState.GameOver;
                 UnityEngine.Debug.Log("The game state is now "+_gameState.ToString());
@@ -486,7 +492,9 @@ public class GameManager : MonoBehaviour
 public enum GameState{
     Loading,
     Battle,
-    GameOver
+    GameOver,
+    Enviroment,
+    StarMenu
 }
 #endregion
 
