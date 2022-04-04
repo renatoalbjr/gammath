@@ -61,8 +61,8 @@ public class GameManager : MonoBehaviour
         EventManager.Instance.OnBeginDrag -= _beginDragHandler;
         EventManager.Instance.OnDropOnSlot -= _dropOnSlotHandler;
 
-        EventManager.Instance.OnGameStateChange -= _turnStageChangeHandler;
-        EventManager.Instance.OnTurnOwnerChange -= _turnStageChangeHandler;
+        EventManager.Instance.OnGameStateChange -= _gameStateChangeHandler;
+        EventManager.Instance.OnTurnOwnerChange -= _turnOwnerChangeHandler;
         EventManager.Instance.OnTurnStageChange -= _turnStageChangeHandler;
         return true;
     }
