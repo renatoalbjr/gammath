@@ -1,11 +1,16 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-public class SceneManager : MonoBehaviour
+public class SceneLoader : MonoBehaviour
 {
     #region Variables
-    public static SceneManager Instance { get; private set; }
+    public static SceneLoader Instance { get; private set; }
+    [SerializeField] private GameObject _loaderCanvas;
+    [SerializeField] private Image _progress;
     #endregion
 
     // ########################################################################################## //
@@ -85,7 +90,7 @@ public class SceneManager : MonoBehaviour
         Debug.Log("Game Object: "+gameObject.name);
         Debug.Log("SceneManager :: Start()");
 
-        EventManager.Instance.StartGameStateChange();
+        //EventManager.Instance.StartGameStateChange();
     }
     #endregion
 
@@ -112,4 +117,28 @@ public class SceneManager : MonoBehaviour
         Debug.Log("Attacked");
         EventManager.Instance.StartTurnStageChange();
     }
+
+    #region Actual SceneLoading
+    public async void LoadScene(string sceneName){
+        var scene = SceneManager.LoadSceneAsync(sceneName);
+        
+        scene.allowSceneActivation = false;
+        _loaderCanvas.SetActive(true);
+        
+        do
+        {
+            await Task.Delay(100);
+            _progress.fillAmount = scene.progress;
+        } while (scene.progress < 0.9f);
+
+        scene.allowSceneActivation = true;
+        _loaderCanvas.SetActive(false);
+
+        if(sceneName == "BattleScene"){
+            _tryToSubscribe();
+            EventManager.Instance?.StartGameStateChange();
+        }
+
+    }
+    #endregion
 }
