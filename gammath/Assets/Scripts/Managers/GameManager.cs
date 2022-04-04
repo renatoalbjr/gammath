@@ -41,7 +41,6 @@ public class GameManager : MonoBehaviour
         if(isSubscribed) return false;
         if(EventManager.Instance == null) return false;
         isSubscribed = true;
-        hasSurrended = false;
 
         // ---Subscribe methods to events---
         EventManager.Instance.OnBeginDrag += _beginDragHandler;
@@ -92,6 +91,7 @@ public class GameManager : MonoBehaviour
         _turnStage = TurnStage.None;
         _turnCounter = 1;
         _turnStopwatch = new Stopwatch();
+        hasSurrended = false;
 
         // ---Set Players---
         _field.SetPlayers(_playerOne, _playerTwo);
