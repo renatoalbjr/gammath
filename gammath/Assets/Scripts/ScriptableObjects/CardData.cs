@@ -12,12 +12,18 @@ public class CardData : ScriptableObject
     [SerializeField] private int _manaCost;
     [SerializeField] private Sprite _back;
     [SerializeField] private Sprite _front;
+    [SerializeField] private Sprite _artwork;
+    [SerializeField] private string _name;
+    [SerializeField] private string _description;
 
     public int Attack { get => _attack; private set => _attack = value; }
     public float Health { get => _health; private set => _health = value; }
     public int ManaCost { get => _manaCost; private set => _manaCost = value; }
     public Sprite Back { get => _back; private set => _back = value; }
     public Sprite Front { get => _front; private set => _front = value; }
+    public Sprite Artwork { get => _artwork; private set => _front = value; }
+    public string Name { get => _name; set => _name = value; }
+    public string Description { get => _description; set => _description = value; }
 
     #endregion
 
