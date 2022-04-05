@@ -377,10 +377,11 @@ public class GameManager : MonoBehaviour
     #region Check conditions for the GameOver
     // ########################################################################################## //
     public bool CheckGameOverConditions(){
-        if(_turnCounter <= _turnCounterLimit) return false;
+        if(_turnCounter > _turnCounterLimit) return true;
+        if(_score <= -6 || _score >= 6) return true;
         //Check the score
         //Check if the surrender button was pressed (the this will only be called next turn, meaning the next player will be the winner);
-        return true;
+        return false;
     }
     // ########################################################################################## //
     #endregion
