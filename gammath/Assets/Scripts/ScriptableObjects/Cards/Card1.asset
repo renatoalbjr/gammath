@@ -12,4 +12,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9c7cd9a99c849fd4d8be44493885917e, type: 3}
   m_Name: Card1
   m_EditorClassIdentifier: 
-  _attack: 1
+  _attack: 2
+  _health: 7

@@ -29,6 +29,7 @@ public class GameManager : MonoBehaviour
     private TurnOwner _turnOwner;
     private TurnStage _turnStage;
     private int _turnCounter;
+    private int _score;
     private Stopwatch _turnStopwatch;
     private bool hasSurrended;
     #endregion
@@ -95,6 +96,7 @@ public class GameManager : MonoBehaviour
         _turnOwner = TurnOwner.None;
         _turnStage = TurnStage.None;
         _turnCounter = 1;
+        _score = 0;
         _turnStopwatch = new Stopwatch();
         hasSurrended = false;
 
@@ -552,6 +554,17 @@ public class GameManager : MonoBehaviour
 
     }
     // ########################################################################################## //
+    #endregion
+
+    #region Score
+    public void ScoreAgainst(float score, TurnOwner player){
+        float newScore = player == TurnOwner.PlayerOne ? -score : score;
+        _score += Mathf.FloorToInt(newScore);
+        _score = Mathf.Clamp(_score, -6, 6);
+    }
+    public int GetScore(){
+        return _score;
+    }
     #endregion
 
 }

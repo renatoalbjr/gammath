@@ -48,7 +48,7 @@ public class CardBehavior : MonoBehaviour
         EventManager.Instance.StartGetAttackValue(attacker, attackValue);
 
         // ---Await the card to GetEnemies and attack the player if possible---
-        List<Card> enemies = await GetEnemies(attacker, field, turnOwner, slotType, columnIndex);
+        List<Card> enemies = await GetEnemies(attacker, field, turnOwner, slotType, columnIndex, attackValue[0]);
 
         // ---If there's no enemy to attack return---
         if(enemies.Count == 0) return;
@@ -111,7 +111,7 @@ public class CardBehavior : MonoBehaviour
     }
 
     // ---Get the enemies to attack---
-    internal virtual async Task<List<Card>> GetEnemies(Card attacker, Field field, TurnOwner turnOwner, SlotType slotType, int columnIndex){
+    internal virtual async Task<List<Card>> GetEnemies(Card attacker, Field field, TurnOwner turnOwner, SlotType slotType, int columnIndex, float attackValue){
         if(turnOwner == TurnOwner.None) return new List<Card>();
 
         TurnOwner enemy = turnOwner == TurnOwner.PlayerOne ? TurnOwner.PlayerTwo : TurnOwner.PlayerOne;
@@ -125,7 +125,7 @@ public class CardBehavior : MonoBehaviour
         EventManager.Instance.StartGetEnemiesToAttack(attacker, cl);
 
         if(cl[0] == null){
-            await AttackPlayer(enemy);
+            await AttackPlayer(attackValue, enemy);
             return new List<Card>();
         }
         
@@ -134,9 +134,9 @@ public class CardBehavior : MonoBehaviour
 
     // ---Attack player---
     // ---Might get subscribed to some events (as Attack)---
-    internal virtual async Task AttackPlayer(TurnOwner enemy){
+    internal virtual async Task AttackPlayer(float attackValue, TurnOwner enemy){
         Debug.Log("Card "+gameObject.name+" attack "+enemy.ToString());
-        // ---Player animaiton---
+        // ---Play animation---
         // ---Calculate Score---
         // List<TurnOwner> turnOwnerContainer.Add(enemy);
         // ---Fire event OnAttackPlayer<Card: attacker, List<TurnOwner>: attackedPlayer> ---
@@ -145,6 +145,7 @@ public class CardBehavior : MonoBehaviour
         
         // ---Set score---
         await Task.Delay(1000);
+        GameManager.Instance.ScoreAgainst(attackValue, enemy);
     }
 
     // ---Activate Special Effects---
