@@ -30,13 +30,22 @@ public class CardBehavior : MonoBehaviour
         Debug.Log("Card Behavior :: Attack = "+attack.ToString());
     }
 
+    /// ################################################################################################## ///
+
     internal virtual async Task Attack(Card attacker, Field field, TurnOwner turnOwner, SlotType slotType, int columnIndex)
     {
         // ---Checks if the card can attack---
-        if(!canAttack(attacker, field, turnOwner, slotType, columnIndex)) return;
+        // ---Fire event OnAttackValidation<Card: attacker> --- //Set flag for blocking and modify default validation
+        EventManager.Instance.StartAttackValidation(attacker);
+
+        if(!canAttack(attacker, field, turnOwner, slotType, columnIndex) || attacker.isBlocked) return;
 
         // ---Gets the attack value---
-        float attack = GetAttackValue(attacker, field, turnOwner, slotType, columnIndex);
+        List<float> attackValue = new List<float>(); //Generates every new attack
+        attackValue.Add(GetAttackValue(attacker, field, turnOwner, slotType, columnIndex));
+        
+        // ---Fire event OnGetAttackValue<Card: attacker, List<float>: attackValue> --- //This way the attack can be modified by reference
+        EventManager.Instance.StartGetAttackValue(attacker, attackValue);
 
         // ---Await the card to GetEnemies and attack the player if possible---
         List<Card> enemies = await GetEnemies(attacker, field, turnOwner, slotType, columnIndex);
@@ -50,13 +59,13 @@ public class CardBehavior : MonoBehaviour
             await Task.Delay(2000);
 
             // ---Play defend and die animations---
-            float dmgDealt = await e.ApplyDMG(attacker, attack);
+            float dmgDealt = await e.ApplyDMG(attacker, attackValue[0]);
             
             Debug.Log("Card "+ gameObject.name
                     + " of "+ turnOwner.ToString()
                     + " at "+ slotType.ToString()+ "_"+ columnIndex.ToString()
                     + " attacked "+e.name+" at "+e.transform.position.ToString()
-                    + " with "+ attack.ToString()+ "pt of attack"
+                    + " with "+ attackValue[0].ToString()+ "pt of attack"
                     + " dealing "+dmgDealt.ToString()+"pt of damage");
         }
     }
@@ -66,15 +75,20 @@ public class CardBehavior : MonoBehaviour
         // ---Plays the defend animation---
         await Task.Delay(300);
 
-        float dmgDealt = Mathf.Min(card.currentHealth, attackValue);
+        List<float> dmgDealt = new List<float>();
+        dmgDealt.Add(Mathf.Min(card.currentHealth, attackValue));
+
+        // ---Fire event OnDMGDealt<Card: defender, Card: attacker, List<float>: dmgDealt> ---
+        EventManager.Instance.StartDMGDealt(card, attacker, dmgDealt);
 
         card.currentHealth = Mathf.Max(card.currentHealth - attackValue, 0);
-        Debug.Log("The card "+card.name+" took "+dmgDealt.ToString()+" and now has "+card.currentHealth.ToString());
+        Debug.Log("The card "+card.name+" took "+dmgDealt[0].ToString()+" and now has "+card.currentHealth.ToString());
+
         if(card.currentHealth <= 0){
             // ---Die---
             await card.Die(attacker);
         }
-        return dmgDealt;
+        return dmgDealt[0];
     }
 
     internal async Task Die(Card card, Card attacker)
@@ -104,21 +118,35 @@ public class CardBehavior : MonoBehaviour
         Card card = field.GetPlacedCard(SlotType.FrontColumn, enemy, columnIndex);
         card = card != null ? card : field.GetPlacedCard(SlotType.BackColumn, enemy, columnIndex);
 
-        if(card == null){
+        List<Card> cl = new List<Card>();
+        cl.Add(card);
+
+        // ---Fire event OnGetEnemiesToAttack<Card: attacker, List<Card>: cl> ---
+        EventManager.Instance.StartGetEnemiesToAttack(attacker, cl);
+
+        if(cl[0] == null){
             await AttackPlayer(enemy);
             return new List<Card>();
         }
         
-        List<Card> cl = new List<Card>();
-        cl.Add(card);
         return cl;
     }
+
     // ---Attack player---
     // ---Might get subscribed to some events (as Attack)---
     internal virtual async Task AttackPlayer(TurnOwner enemy){
         Debug.Log("Card "+gameObject.name+" attack "+enemy.ToString());
-        /// ---Player animaiton---
-        /// ---Set score---
+        // ---Player animaiton---
+        // ---Calculate Score---
+        // List<TurnOwner> turnOwnerContainer.Add(enemy);
+        // ---Fire event OnAttackPlayer<Card: attacker, List<TurnOwner>: attackedPlayer> ---
+        
+        //EventManager.Instance.StartOnAttackPlayer(GetComponent<Card>(), attackedPlayer);
+        
+        // ---Set score---
         await Task.Delay(1000);
     }
+
+    // ---Activate Special Effects---
+    // ---Each card will determine how their special effect are activated---
 }

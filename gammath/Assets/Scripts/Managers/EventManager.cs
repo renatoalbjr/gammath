@@ -1,5 +1,6 @@
 using UnityEngine;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// Holds declarations of events and the methods to invoke them
@@ -25,7 +26,18 @@ public class EventManager : MonoBehaviour
     public event Action OnTurnStageChange;
     public event Action OnGameOver;
     public event Action OnSceneUnload;
-    public event Action OnAttack;
+    #endregion
+
+    #region Battle events
+    public event Action<Card> OnAttackValidation;
+    public event Action<Card, List<float>> OnGetAttackValue;
+    public event Action<Card, Card, List<float>> OnDMGDealt;
+    public event Action<Card, List<Card>> OnGetEnemiesToAttack;
+    public event Action<Card, List<TurnOwner>> OnAttackPlayer;
+    public event Action OnPlace;
+    public event Action OnMove;
+    public event Action OnDie;
+    public event Action OnDraw;
     #endregion
     #endregion
 
@@ -52,39 +64,27 @@ public class EventManager : MonoBehaviour
     // ########################################################################################## //
 
     #region Invoke Methods
+
     #region Player events
-    public void StartBeginDrag(Draggable dragComp){
-        OnBeginDrag?.Invoke(dragComp);
-    }
-    public void StartDropOnSlot(Slot slot, Draggable draggable){
-        OnDropOnSlot?.Invoke(slot, draggable);
-    }
+    public void StartBeginDrag(Draggable dragComp) => OnBeginDrag?.Invoke(dragComp);
+    public void StartDropOnSlot(Slot slot, Draggable draggable) => OnDropOnSlot?.Invoke(slot, draggable);
     #endregion
 
     #region Game state events
-    public void StartGameStateChange(){
-        OnGameStateChange?.Invoke();
-    }
+    public void StartGameStateChange() => OnGameStateChange?.Invoke();
+    public void StartTurnOwnerChange() => OnTurnOwnerChange?.Invoke();
+    public void StartTurnStageChange() => OnTurnStageChange?.Invoke();
+    public void StartGameOver() => OnGameOver?.Invoke();
+    public void StartSceneUnload() => OnSceneUnload?.Invoke();
 
-    public void StartTurnOwnerChange(){
-        OnTurnOwnerChange?.Invoke();
-    }
+    #region Battle events
+    public void StartAttackValidation(Card attacker) => OnAttackValidation?.Invoke(attacker);
+    public void StartGetAttackValue(Card attacker, List<float> attackValue) => OnGetAttackValue?.Invoke(attacker, attackValue);
+    public void StartDMGDealt(Card defender, Card attacker, List<float> dmgDealt) => OnDMGDealt?.Invoke(defender, attacker, dmgDealt);
+    public void StartGetEnemiesToAttack(Card attacker, List<Card> enemies) => OnGetEnemiesToAttack?.Invoke(attacker, enemies);
+    public void StartOnAttackPlayer(Card attacker, List<TurnOwner> attackedPlayer) => OnAttackPlayer?.Invoke(attacker, attackedPlayer);
+    #endregion
 
-    public void StartTurnStageChange(){
-        OnTurnStageChange?.Invoke();
-    }
-
-    public void StartGameOver(){
-        OnGameOver?.Invoke();
-    }
-
-    public void StartSceneUnload(){
-        OnSceneUnload?.Invoke();
-    }
-
-    public void StartAtack(){
-        OnAttack?.Invoke();
-    }
     #endregion
     #endregion
 }

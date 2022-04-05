@@ -29,7 +29,6 @@ public class SceneLoader : MonoBehaviour
         // ---Subscribe methods to events---
         EventManager.Instance.OnGameOver += EndGameAnimations;
         EventManager.Instance.OnSceneUnload += SceneUnloader;
-        EventManager.Instance.OnAttack += Attack;
         return true;
     }
     ///<summary>Horrible piece of boilerplate code to get around unity's random awkening order</summary>
@@ -38,9 +37,8 @@ public class SceneLoader : MonoBehaviour
         isSubscribed = false;
 
         // ---Unsubscribe methods to events---
-        EventManager.Instance.OnGameOver -= EndGameAnimations;
+        EventManager.Instance.OnGameOver -= EndGameAnimations; //Replace by direct calls
         EventManager.Instance.OnSceneUnload -= SceneUnloader;
-        EventManager.Instance.OnAttack -= Attack;
         return true;
     }
     #endregion
@@ -54,7 +52,7 @@ public class SceneLoader : MonoBehaviour
         
         isSubscribed = false;
         
-        // ---Singleton Implementation---
+        // ---Singleton Implementation--- //Remove later (attach this to the object GameManager)
         if(Instance == null)
             Instance = this;
         else
@@ -111,11 +109,6 @@ public class SceneLoader : MonoBehaviour
     public void SceneUnloader(){
         Debug.Log("Unloading scene...");
         Debug.Log("Finished unloading the scene");
-    }
-
-    public void Attack(){
-        Debug.Log("Attacked");
-        EventManager.Instance.StartTurnStageChange();
     }
 
     #region Actual SceneLoading
