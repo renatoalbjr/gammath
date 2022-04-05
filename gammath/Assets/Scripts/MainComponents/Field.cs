@@ -24,10 +24,10 @@ public class Field : MonoBehaviour
 
     private void GenerateAllSlots()
     {
-        slots = new CardSlot[fieldSize.y, fieldSize.x];
+        slots = new CardSlot[fieldSize.x, fieldSize.y];
         for(int x = 0; x < fieldSize.x; x++)
             for(int y = 0; y < fieldSize.y; y++)
-                slots[y, x] = GenerateSingleSlot(x, y);
+                slots[x, y] = GenerateSingleSlot(x, y);
     }
 
     private CardSlot GenerateSingleSlot(int x, int y){
@@ -57,5 +57,20 @@ public class Field : MonoBehaviour
         players[0] = one;
         players[1] = two;
         arePlayersSet = true;
+    }
+
+    internal Card[] GetPlacedCards(SlotType slotType, TurnOwner turnOwner)
+    {
+        Card[] cards = new Card[fieldSize.y];
+        int x = turnOwner == TurnOwner.PlayerOne ? (int) slotType : 7-(int) slotType;
+        for(int y = 0; y < fieldSize.y; y++)
+            cards[y] = (slots[x, y].GetContent(0));
+        return cards;
+    }
+
+    internal Card GetPlacedCard(SlotType slotType, TurnOwner turnOwner, int columnIndex)
+    {
+        int x = turnOwner == TurnOwner.PlayerOne ? (int) slotType : 7-(int) slotType;
+        return slots[x, columnIndex].GetContent(0);
     }
 }

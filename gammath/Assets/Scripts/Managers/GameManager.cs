@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using UnityEngine;
 
 /// <summary>
@@ -278,7 +279,7 @@ public class GameManager : MonoBehaviour
     /// And triggered by the End Turn button on UI (During PlacingStage)
     /// Those triggers on PlacingStage are enabled with a validator inside the PlacingStage case
 	/// </remarks>
-    private void _turnStageUpdater(){
+    private async void _turnStageUpdater(){
         //~And also triggered by itself~ (Wrong, it depends on other triggers that happens mostly during PlacingStage)
 
         switch (_turnStage)
@@ -297,7 +298,8 @@ public class GameManager : MonoBehaviour
                 _turnStopwatch.Stop();
                 _turnStopwatch.Reset();
                 UnityEngine.Debug.Log("The "+_turnOwner.ToString()+" turn stage is now "+_turnStage.ToString());
-                EventManager.Instance.StartAtack();
+                await Attack(_turnOwner);
+                _turnStageUpdater();
                 break;
 
             //After AttackStage
@@ -309,6 +311,8 @@ public class GameManager : MonoBehaviour
         }
     }
     #endregion
+
+    // ---Checkers---
 
     #region Check Objects Ownership
     // ########################################################################################## //
@@ -342,6 +346,7 @@ public class GameManager : MonoBehaviour
         //return owner == player;
         return CheckTurnOwner(owner); //Until online, assumes that the actioner is the turn owner, then compares it with the card owner
     }
+    // ########################################################################################## //
     #endregion
 
     #region Checks the turnOwner
@@ -364,17 +369,18 @@ public class GameManager : MonoBehaviour
 
         return p == player;
     }
+    // ########################################################################################## //
     #endregion
 
     #region Check conditions for the GameOver
     // ########################################################################################## //
-
     public bool CheckGameOverConditions(){
         if(_turnCounter <= _turnCounterLimit) return false;
         //Check the score
         //Check if the surrender button was pressed (the this will only be called next turn, meaning the next player will be the winner);
         return true;
     }
+    // ########################################################################################## //
     #endregion
 
     // ---Validators---
@@ -382,7 +388,6 @@ public class GameManager : MonoBehaviour
 
     #region Validates a card drag
     // ########################################################################################## //
-
     private void _beginDragHandler(Draggable dragComp){
         UnityEngine.Debug.Log("Game Manager :: _beginCardDragHandler");
         if(dragComp){
@@ -391,11 +396,11 @@ public class GameManager : MonoBehaviour
             if(_gameState != GameState.Battle || !CheckOwnership(dragComp, null)) dragComp.canDrag = false;
         }
     }
+    // ########################################################################################## //
     #endregion
 
     #region Validates a card drop
     // ########################################################################################## //
-
     private void _dropOnSlotHandler(Slot slot, Draggable dragComp){
         // ---Drop will only be allowed at Battle state---
         // ---And during the objects owner turn---
@@ -408,80 +413,145 @@ public class GameManager : MonoBehaviour
                || CheckTurnOwner(null)
                ) 
                slot.canPlace = false;
+            //Do slot.canPlace = Card.CanPlace(field, slot, dragComp.GetComponent<Card>());
         }
     }
+    // ########################################################################################## //
     #endregion
 
     #region Validates a card draw
-    
+    // ########################################################################################## //
+    // ########################################################################################## //
     #endregion
 
     #region Validates a click on the end turn button
+    // ########################################################################################## //
     public static void EndTurnButtonHandler(){
         GameManager instance = GameManager.Instance;
-        if(instance._turnStage == TurnStage.PlacingStage)
+        if(instance._turnStage == TurnStage.PlacingStage && instance._gameState == GameState.Battle)
             instance._turnStageChangeHandler();
     }
+    // ########################################################################################## //
     #endregion
 
     #region Validates a click on the surrender button
-
-    public static void SurrenderButtonHandler(){
+    // ########################################################################################## //
+    public static void SurrenderButtonHandler(/* Player p */){
         GameManager instance = GameManager.Instance;
         if(instance._gameState == GameState.Battle){
             instance.hasSurrended = true;
-            EndTurnButtonHandler();
+            // if(instance.CheckTurnOwner(p) || instance.GetTurnOwner() == TurnOwner.None){
+                instance._turnStopwatch.Stop();
+                instance._turnStopwatch.Reset();
+                instance._turnOwnerChangeHandler();
+            // }
+            // else
+            //     EndTurnButtonHandler();
         }
     }
-
+    // ########################################################################################## //
     #endregion
 
     #region Validates OnGameStateChange event
     // ########################################################################################## //
-
     private void _gameStateChangeHandler(){
         _gameStateUpdater();
     }
+    // ########################################################################################## //
     #endregion
     
     #region Validates OnTurnOwnerChange event
     // ########################################################################################## //
-
     private void _turnOwnerChangeHandler(){
         _turnOwnerUpdater();
     }
+    // ########################################################################################## //
     #endregion
 
     #region Validates OnTurnStageChange event
     // ########################################################################################## //
-
     private void _turnStageChangeHandler(){
         _turnStageUpdater();
     }
+    // ########################################################################################## //
     #endregion
 
-    #region Public utilities
+    // --- Public Utilities---
 
+    #region Returns the Turn Elapsed Time
+    // ########################################################################################## //
     public System.TimeSpan GetTurnStageET(){
         return GameManager.Instance._turnStopwatch.Elapsed;
     }
+    // ########################################################################################## //
+    #endregion
 
+    #region Return the Turn Time Left
+    // ########################################################################################## //
     public System.TimeSpan GetTurnStageTL(){
         return System.TimeSpan.FromSeconds(_turnTimeLimit) - _turnStopwatch.Elapsed;
     }
+    // ########################################################################################## //
+    #endregion
 
+    #region Return the Turn Owner
+    // ########################################################################################## //
     public TurnOwner GetTurnOwner(){
         return GameManager.Instance._turnOwner;
     }
+    // ########################################################################################## //
+    #endregion
 
+    #region Return the turn Time Limit
+    // ########################################################################################## //
     public System.TimeSpan GetTurnTimeLimit(){
         return System.TimeSpan.FromSeconds(_turnTimeLimit);
     }
+    // ########################################################################################## //
+    #endregion
 
+    #region Return the current turn
+    // ########################################################################################## //
     public int GetTurnCounter(){
         return _turnCounter;
     }
+    // ########################################################################################## //
+    #endregion
 
+    #region Attack
+    // ########################################################################################## //
+    /// <summary>
+    /// Call the Card.Attack() on every card in the field in the proper order. This allows special placement attacks.
+    /// </summary>
+    private async Task Attack(TurnOwner attackingPlayer)
+    {
+        List<Card> attackers = new List<Card>();
+
+        // ---Make the front column attack---
+        await Attack(SlotType.FrontColumn, attackingPlayer);
+
+        // ---Make the back column attack---
+        await Attack(SlotType.BackColumn, attackingPlayer);
+
+        // ---Make the Preview column attack---
+        await Attack(SlotType.Preview, attackingPlayer);
+
+        // ---Make the Placement column attack---
+        await Attack(SlotType.Placement, attackingPlayer);
+
+    }
+
+    private async Task Attack(SlotType slotType, TurnOwner turnOwner)
+    {
+        Card[] attackers = _field.GetPlacedCards(slotType, turnOwner);
+        for (int i = 0; i < attackers.Length; i++)
+        {
+            if(attackers[i] == null) continue;
+            await attackers[i].Attack(_field, turnOwner, slotType, i);
+        }
+
+    }
+    // ########################################################################################## //
     #endregion
 
 }

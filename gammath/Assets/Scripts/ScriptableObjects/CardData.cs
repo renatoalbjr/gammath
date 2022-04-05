@@ -8,8 +8,10 @@ public class CardData : ScriptableObject
 {
     #region Variables
     [SerializeField] private int _attack;
+    [SerializeField] private float _health;
 
     public int Attack { get => _attack; private set => _attack = value; }
+    public float Health { get => _health; private set => _health = value; }
 
     #endregion
 
