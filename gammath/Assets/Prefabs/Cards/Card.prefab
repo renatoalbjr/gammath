@@ -100,6 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardData: {fileID: 11400000, guid: a9ee76f4d9e7af840a1f2fe43fd3abe7, type: 2}
   behavior: {fileID: -1217286940100289714}
+  sr: {fileID: -3903460976345483030}
 --- !u!61 &-6408239101449507381
 BoxCollider2D:
   m_ObjectHideFlags: 0

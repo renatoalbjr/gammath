@@ -11,6 +11,9 @@ public class SceneLoader : MonoBehaviour
     public static SceneLoader Instance { get; private set; }
     [SerializeField] private GameObject _loaderCanvas;
     [SerializeField] private Image _progress;
+
+    [SerializeField] private List<GameObject> BattleScene = new List<GameObject>();
+    [SerializeField] private List<GameObject> Enviroment = new List<GameObject>();
     #endregion
 
     // ########################################################################################## //
@@ -132,6 +135,15 @@ public class SceneLoader : MonoBehaviour
             EventManager.Instance?.StartGameStateChange();
         }
 
+    }
+
+    public void ActivateBattleScene(){
+        foreach(GameObject go in Enviroment){
+            go.SetActive(false);
+        }
+        foreach(GameObject go in BattleScene){
+            go.SetActive(true);
+        }
     }
     #endregion
 }

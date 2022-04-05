@@ -80,8 +80,13 @@ public class GameManager : MonoBehaviour
         EventManager.Instance.OnTurnStageChange -= _turnStageChangeHandler;
         return true;
     }
+
+    internal Player GetTurnPlayer()
+    {
+        return _turnOwner == TurnOwner.PlayerOne ? _playerOne : _playerTwo;
+    }
     #endregion
-    
+
     #region Unity Methods
     #region Awake
     // ########################################################################################## //
@@ -247,6 +252,11 @@ public class GameManager : MonoBehaviour
         {
             //After Initializing
             case TurnOwner.None:
+                // ---Distibute players initial cards---
+                MoveToHand(_playerOneDeck, _playerOneHand, _startingCards);
+                MoveToHand(_playerTwoDeck, _playerTwoHand, _startingCards);
+                EventManager.Instance.StartOnMove();
+
                 _turnOwner = TurnOwner.PlayerOne;
                 UnityEngine.Debug.Log("Now is "+_turnOwner.ToString()+" turn");
                 EventManager.Instance.StartTurnStageChange();
@@ -291,17 +301,28 @@ public class GameManager : MonoBehaviour
                     }
                     else{
                         // ---Advance PlayerOne cards--
+                        _field.AdvanceCards(TurnOwner.PlayerOne, SlotType.BackColumn);
                         _field.AdvanceCards(TurnOwner.PlayerOne, SlotType.Preview);
                         _field.AdvanceCards(TurnOwner.PlayerOne, SlotType.Placement);
+                        _field.AdvanceCards(TurnOwner.PlayerOne, SlotType.BackColumn);
                         
                         // ---Advance PlayerTwo cards--
+                        _field.AdvanceCards(TurnOwner.PlayerTwo, SlotType.BackColumn);
                         _field.AdvanceCards(TurnOwner.PlayerTwo, SlotType.Preview);
                         _field.AdvanceCards(TurnOwner.PlayerTwo, SlotType.Placement);
+                        _field.AdvanceCards(TurnOwner.PlayerTwo, SlotType.BackColumn);
 
                         EventManager.Instance.StartTurnStageChange();
                     }
                 }
                 break;
+        }
+    }
+
+    private void MoveToHand(Deck deck, Hand h, int startingCards)
+    {
+        for(int i = 0; i < startingCards; i++){
+            MoveToHand(deck, h);
         }
     }
     #endregion
@@ -311,9 +332,9 @@ public class GameManager : MonoBehaviour
 
     /// <summary>
     /// Subscribed to OnTurnStageChange.
-	/// Decides the next turnState based on the current one.
-	/// </summary>
-	/// <remarks>
+    /// Decides the next turnState based on the current one.
+    /// </summary>
+    /// <remarks>
     /// If it's None, updates to PlacingStage
     /// If it's PlacingStage, updates to AttackStage and triggers OnAttack
     /// If it's AttackStage, triggers OnTurnChange and updates to None
@@ -321,7 +342,7 @@ public class GameManager : MonoBehaviour
     /// Also triggered by a counter that checks for time limits on every Update (During PlacingStage)
     /// And triggered by the End Turn button on UI (During PlacingStage)
     /// Those triggers on PlacingStage are enabled with a validator inside the PlacingStage case
-	/// </remarks>
+    /// </remarks>
     private async void _turnStageUpdater(){
         //~And also triggered by itself~ (Wrong, it depends on other triggers that happens mostly during PlacingStage)
 
@@ -331,6 +352,8 @@ public class GameManager : MonoBehaviour
             case TurnStage.None:
                 _turnStage = TurnStage.PlacingStage;
                 ModifyCurrentMana(_turnOwner, _manaPerTurn);
+                Player p = _turnOwner == TurnOwner.PlayerOne ? _playerOne : _playerTwo;
+                p.drawsLeft = _drawsPerTurn;
                 _turnStopwatch.Start();
                 UnityEngine.Debug.Log("The "+_turnOwner.ToString()+" turn stage is now "+_turnStage.ToString());
                 break;
@@ -546,9 +569,19 @@ public class GameManager : MonoBehaviour
             UnityEngine.Debug.Log(h.name + " is full");
             return;
         }
+        Player p = deck.GetOwner();
+        if(p == null){
+            UnityEngine.Debug.Log("Deck does not belong to any player!");
+            return;
+        }
+        if(p.drawsLeft == 0){
+            UnityEngine.Debug.Log("The player "+p.name+"does not have draw left");
+            return;
+        }
 
         // ---Move to hand---
         MoveToHand(deck, h);
+        p.drawsLeft--;
     }
 
     private static void MoveToHand(Deck deck, Hand h)
@@ -564,6 +597,7 @@ public class GameManager : MonoBehaviour
         h.PlaceUnsafe(c);
 
         UnityEngine.Debug.Log("Card " + c.name + " placed at " + h.name);
+        EventManager.Instance.StarDraw();
     }
 
 
@@ -715,6 +749,12 @@ public class GameManager : MonoBehaviour
     {
         Player p = player == TurnOwner.PlayerOne ? _playerOne : _playerTwo;
         return p.currentMana;
+    }
+
+    internal int GetDrawsLeft(TurnOwner player)
+    {
+        Player p = player == TurnOwner.PlayerOne ? _playerOne : _playerTwo;
+        return p.drawsLeft;
     }
     #endregion
 

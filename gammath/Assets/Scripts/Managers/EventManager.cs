@@ -78,6 +78,7 @@ public class EventManager : MonoBehaviour
     public void StartTurnStageChange() => OnTurnStageChange?.Invoke();
     public void StartGameOver() => OnGameOver?.Invoke();
     public void StartSceneUnload() => OnSceneUnload?.Invoke();
+    public void StarDraw() => OnDraw?.Invoke();
 
     #region Battle events
     public void StartAttackValidation(Card attacker) => OnAttackValidation?.Invoke(attacker);
@@ -86,6 +87,8 @@ public class EventManager : MonoBehaviour
     public void StartGetEnemiesToAttack(Card attacker, List<Card> enemies) => OnGetEnemiesToAttack?.Invoke(attacker, enemies);
     public void StartOnAttackPlayer(Card attacker, List<TurnOwner> attackedPlayer) => OnAttackPlayer?.Invoke(attacker, attackedPlayer);
     #endregion
+
+    public void StartOnMove() => OnMove?.Invoke();
 
     #endregion
     #endregion

@@ -7,6 +7,7 @@ using System;
 
 public class Player : MonoBehaviour
 {
+    internal int drawsLeft;
     [SerializeField] private string username;
     [SerializeField] private Rank rank;
     [SerializeField] private Sprite profilePic;
