@@ -94,7 +94,7 @@ public class CardBehavior : MonoBehaviour
     internal async Task Die(Card card, Card attacker)
     {
         // ---Move to cemetery animation---
-        //GameManager.Instance.MoveToCemetery(card);
+        GameManager.Instance.MoveToCemetery(card);
         await Task.Delay(100);
         Debug.Log("The card "+card.name+" have died");
     }

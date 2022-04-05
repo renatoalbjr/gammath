@@ -18,6 +18,7 @@ public class EventManager : MonoBehaviour
     #region Player input events
     public event Action<Draggable> OnBeginDrag;
     public event Action<Slot, Draggable> OnDropOnSlot;
+    public event Action<Deck> OnClickOnDeck;
     #endregion
 
     #region Game state events
@@ -68,6 +69,7 @@ public class EventManager : MonoBehaviour
     #region Player events
     public void StartBeginDrag(Draggable dragComp) => OnBeginDrag?.Invoke(dragComp);
     public void StartDropOnSlot(Slot slot, Draggable draggable) => OnDropOnSlot?.Invoke(slot, draggable);
+    public void StartClickOnDeck(Deck deck) => OnClickOnDeck?.Invoke(deck);
     #endregion
 
     #region Game state events

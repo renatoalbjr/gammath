@@ -17,6 +17,7 @@ public class Card : MonoBehaviour, IBelong
     public float currentAttack { get; internal set; }
     public float currentHealth { get; internal set; }
     public bool isBlocked { get; internal set; }
+    public int manaCost { get; internal set; }
 
     //Must override StartBeginDragEvent to trigger a OnCardDrag event
 
@@ -24,6 +25,7 @@ public class Card : MonoBehaviour, IBelong
         Debug.Log("Card :: "+gameObject.name+" :: Awake()");
         currentAttack = cardData.Attack;
         currentHealth = cardData.Health;
+        manaCost = cardData.ManaCost;
         isBlocked = false;
     }
     void OnEnable(){

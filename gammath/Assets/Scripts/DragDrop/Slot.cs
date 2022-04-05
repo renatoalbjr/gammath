@@ -4,6 +4,7 @@ using UnityEngine.EventSystems;
 public class Slot: ContainerBase, IDropHandler, IPointerEnterHandler, IPointerExitHandler, IBelong
 {
     private Player owner;
+    internal SlotType type;
     public Player BelongsTo(Player p)
     {
         Debug.Log(string.Format("{0} now belongs to {1}", gameObject.name, p.gameObject.name));

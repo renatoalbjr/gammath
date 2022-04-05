@@ -102,6 +102,44 @@ public class ContainerBase : MonoBehaviour
         return true;
     }
 
+    internal virtual bool PlaceUnsafe<T>(T tObj)
+    where T : Component
+    {
+        // ---If there's nothing to place---
+        if(tObj == null) return false;
+
+        // ---Check if can place, by default it can---
+        //ValidateCanPlace(tObj);
+        if(!canPlace){ }
+        else
+            if(filledCapacity + 1 > maxCapacity) canPlace = false;
+
+        if(!canPlace){
+            // --- Resets canPlace---
+            canPlace = true;
+            return false;
+        }
+        canPlace = true;
+
+        filledCapacity++;
+
+        if (placeholder != null)
+        {
+            int placeholderSibilingIndex = placeholder.transform.GetSiblingIndex();
+            tObj.transform.parent = transform;
+            tObj.transform.SetSiblingIndex(placeholderSibilingIndex);
+
+            tObj.transform.position = placeholder.transform.position;
+        }
+        else
+        {
+            tObj.transform.position = new Vector3(transform.position.x, transform.position.y, transform.position.z - 1);
+            tObj.transform.SetParent(transform);
+        }
+        DestroyPlaceholder(tObj);
+        return true;
+    }
+
     internal virtual void Remove<T>(T tObj)
     where T : Component
     {

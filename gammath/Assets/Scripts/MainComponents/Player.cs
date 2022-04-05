@@ -17,6 +17,8 @@ public class Player : MonoBehaviour
     [SerializeField] private TMPro.TMP_Text rankText;
     [SerializeField] private Image profileImage;
 
+    public int currentMana { get; internal set; }
+
     public void Start(){
         usernameText.text = username;
         rankText.text = rank.Description();

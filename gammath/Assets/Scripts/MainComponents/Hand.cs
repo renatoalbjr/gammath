@@ -31,6 +31,13 @@ public class Hand : Slot
     // ########################################################################################## //
 
     #region Unity Methods
+    #region Awake
+        // ########################################################################################## //
+    internal void Awake(){
+        type = SlotType.Hand;
+    }
+    #endregion
+
     #region Start
     // ########################################################################################## //
 
@@ -117,6 +124,13 @@ public class Hand : Slot
             }
             t.position = new Vector3(t.position.x, cSize.y/2+updateHeight*i-updateOffset, -childCount+i);
         }
+    }
+
+    internal bool CheckIfFits(int size)
+    {
+        if(!canPlace) return false;
+        if(filledCapacity + size > maxCapacity) return false;
+        return true;
     }
 
     #endregion

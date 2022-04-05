@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -21,8 +22,14 @@ public class GameManager : MonoBehaviour
     [SerializeField] private Hand _playerTwoHand;
     [SerializeField] private Deck _playerOneDeck;
     [SerializeField] private Deck _playerTwoDeck;
+    [SerializeField] private Deck _playerOneCemetery;
+    [SerializeField] private Deck _playerTwoCemetery;
     [SerializeField] private int _turnCounterLimit;
     [SerializeField] private int _turnTimeLimit;
+    [SerializeField] private int _drawsPerTurn;
+    [SerializeField] private int _manaPerTurn;
+    [SerializeField] private int _startingMana;
+    [SerializeField] private int _startingCards;
 
     // ---Internal use variables---
     private GameState _gameState;
@@ -51,6 +58,7 @@ public class GameManager : MonoBehaviour
         // ---Subscribe methods to events---
         EventManager.Instance.OnBeginDrag += _beginDragHandler;
         EventManager.Instance.OnDropOnSlot += _dropOnSlotHandler;
+        EventManager.Instance.OnClickOnDeck += _clickOnDeckHandler;
 
         EventManager.Instance.OnGameStateChange += _gameStateChangeHandler;
         EventManager.Instance.OnTurnOwnerChange += _turnOwnerChangeHandler;
@@ -65,6 +73,7 @@ public class GameManager : MonoBehaviour
         // ---Unsubscribe methods to events---
         EventManager.Instance.OnBeginDrag -= _beginDragHandler;
         EventManager.Instance.OnDropOnSlot -= _dropOnSlotHandler;
+        EventManager.Instance.OnClickOnDeck -= _clickOnDeckHandler;
 
         EventManager.Instance.OnGameStateChange -= _gameStateChangeHandler;
         EventManager.Instance.OnTurnOwnerChange -= _turnOwnerChangeHandler;
@@ -101,12 +110,36 @@ public class GameManager : MonoBehaviour
         hasSurrended = false;
 
         // ---Set Players---
+        // ---Initialize player variable to make it DontDestroyOnLoad--- //To carry data across scenes
         _field.SetPlayers(_playerOne, _playerTwo);
         _playerOneHand.BelongsTo(_playerOne);
-        _playerTwoHand.BelongsTo(_playerTwo);/* 
+        _playerTwoHand.BelongsTo(_playerTwo); 
         _playerOneDeck.BelongsTo(_playerOne);
-        _playerTwoDeck.BelongsTo(_playerTwo); */
+        _playerTwoDeck.BelongsTo(_playerTwo);
+        _playerTwoHand.BelongsTo(_playerTwo); 
+        _playerOneCemetery.BelongsTo(_playerOne);
+        _playerTwoCemetery.BelongsTo(_playerTwo);
 
+        // ---Set players mana---
+        _playerOne.currentMana = _startingMana;
+        _playerTwo.currentMana = _startingMana;
+
+    }
+
+    internal void MoveToCemetery(Card card)
+    {
+        CardSlot cs = card.transform.parent.GetComponent<CardSlot>();
+        if(cs == null){
+            UnityEngine.Debug.Log("Unparented card died");
+        }
+        else{
+            // ---Remove from card slot---
+            cs.Remove(card);
+        }
+        // ---Add to cemetery---
+        Deck cm = card.GetOwner() == _playerOne ? _playerOneCemetery : _playerTwoCemetery;
+        cm.PlaceRandom(card.transform, 0, cm.filledCapacity-1);
+        UnityEngine.Debug.Log(card.name+" moved to "+cm.name);
     }
     #endregion
 
@@ -257,6 +290,14 @@ public class GameManager : MonoBehaviour
                         EventManager.Instance.StartGameStateChange();
                     }
                     else{
+                        // ---Advance PlayerOne cards--
+                        _field.AdvanceCards(TurnOwner.PlayerOne, SlotType.Preview);
+                        _field.AdvanceCards(TurnOwner.PlayerOne, SlotType.Placement);
+                        
+                        // ---Advance PlayerTwo cards--
+                        _field.AdvanceCards(TurnOwner.PlayerTwo, SlotType.Preview);
+                        _field.AdvanceCards(TurnOwner.PlayerTwo, SlotType.Placement);
+
                         EventManager.Instance.StartTurnStageChange();
                     }
                 }
@@ -289,6 +330,7 @@ public class GameManager : MonoBehaviour
             //After TurnChange
             case TurnStage.None:
                 _turnStage = TurnStage.PlacingStage;
+                ModifyCurrentMana(_turnOwner, _manaPerTurn);
                 _turnStopwatch.Start();
                 UnityEngine.Debug.Log("The "+_turnOwner.ToString()+" turn stage is now "+_turnStage.ToString());
                 break;
@@ -301,6 +343,13 @@ public class GameManager : MonoBehaviour
                 _turnStopwatch.Reset();
                 UnityEngine.Debug.Log("The "+_turnOwner.ToString()+" turn stage is now "+_turnStage.ToString());
                 await Attack(_turnOwner);
+
+                // ---Advance PlayerOne cards--
+                _field.AdvanceCards(TurnOwner.PlayerOne, SlotType.BackColumn);
+                
+                // ---Advance PlayerTwo cards--
+                _field.AdvanceCards(TurnOwner.PlayerTwo, SlotType.BackColumn);
+
                 _turnStageUpdater();
                 break;
 
@@ -311,6 +360,13 @@ public class GameManager : MonoBehaviour
                 EventManager.Instance.StartTurnOwnerChange();
                 break;
         }
+    }
+
+    internal void ModifyCurrentMana(TurnOwner turnOwner, int manaPerTurn)
+    {
+        Player p = turnOwner == TurnOwner.PlayerOne ? _playerOne : _playerTwo;
+        UnityEngine.Debug.Log(p.name+" current mana changed from "+p.currentMana.ToString()+" to "+Mathf.Clamp(p.currentMana+manaPerTurn, 0, 100).ToString());
+        p.currentMana = Mathf.Clamp(p.currentMana+manaPerTurn, 0, 100);
     }
     #endregion
 
@@ -396,7 +452,17 @@ public class GameManager : MonoBehaviour
         if(dragComp){
             if(!dragComp.canDrag) return;
             // ---Drag will be allowed only during Battle state AND by the objects owner---
-            if(_gameState != GameState.Battle || !CheckOwnership(dragComp, null)) dragComp.canDrag = false;
+            if(_gameState != GameState.Battle //Out of Battle
+               || !CheckOwnership(dragComp, null) //It's not the players card
+               ) dragComp.canDrag = false;
+            Card c = dragComp.GetComponent<Card>();
+            if(c != null){
+                CardSlot cs = c.transform.parent?.GetComponent<CardSlot>();
+                if(cs != null){
+                    if(cs.type != SlotType.Placement)
+                        dragComp.canDrag = false; //Don't allow drag of cards already in game
+                }
+            }
         }
     }
     // ########################################################################################## //
@@ -409,21 +475,99 @@ public class GameManager : MonoBehaviour
         // ---And during the objects owner turn---
         // ---The objects owner turn breaks down to ownership and turn---
         if(slot != null){
-            if(!slot.canPlace) return;
-            if(_gameState != GameState.Battle
-               || !CheckOwnership(dragComp, null)
-               || !CheckOwnership(slot, null)
-               || CheckTurnOwner(null)
-               ) 
-               slot.canPlace = false;
+            if(!slot.canPlace) return;                 //Won't allow drop if:
+            if(_gameState != GameState.Battle          //Out of battle
+               || CheckTurnOwner(null)                 //Is not the players turn //Remove ! when able to get the player (online)
+               || _turnStage != TurnStage.PlacingStage //It's not placing stage
+               || (slot.type != SlotType.Placement     //It's not either a placement slot
+               && slot.type != SlotType.Hand)          //or hand
+               //|| !CheckOwnership(dragComp, null)    //It's not the players card (Let the dragHandler decide)
+               || !CheckOwnership(slot, null)          //It's not the players slot
+               ){
+
+                slot.canPlace = false;
+                return;
+            }
+
+            Card c = dragComp.GetComponent<Card>();
+            if(c == null){
+                UnityEngine.Debug.Log("Dragged object is not a card");
+                slot.canPlace = false;
+                return;
+            }
+
+            Player p = c.GetOwner();
+            if(p == null){
+                UnityEngine.Debug.Log("Dragged card does not belong to any player");
+                slot.canPlace = false;
+                return;
+            }
+
+            if(slot.type == SlotType.Placement){
+                //Validate enough mana
+                if(p.currentMana < c.manaCost){
+                    UnityEngine.Debug.Log("Dragged card can't be placed because the owner doesnt have enough mana");
+                    slot.canPlace = false;
+                    return;
+                }
+
+                //Updates the mana if canPlace
+                //ModifyCurrentMana(p, -c.manaCost);
+                slot.canPlace = true;
+                return;
+            }
+            else{
+                //Update mana
+                //ModifyCurrentMana(p, 0+c.manaCost);
+                slot.canPlace = true;
+                return;
+            }
             //Do slot.canPlace = Card.CanPlace(field, slot, dragComp.GetComponent<Card>());
         }
     }
+
+    internal void ModifyCurrentMana(Player p, int mana)
+    {
+        UnityEngine.Debug.Log(p.name+" current mana changed from "+p.currentMana.ToString()+" to "+Mathf.Clamp(p.currentMana+mana, 0, 100).ToString());
+        p.currentMana = Mathf.Clamp(p.currentMana+mana, 0, 100);
+    }
+
     // ########################################################################################## //
     #endregion
 
     #region Validates a card draw
     // ########################################################################################## //
+    private void _clickOnDeckHandler(Deck deck)
+    {
+        // ---Must check if can be placed on hand before removal---
+        Hand h = deck.GetOwner() == _playerOne ? _playerOneHand : _playerTwoHand;
+        if (!h.CheckIfFits(1))
+        {
+            UnityEngine.Debug.Log(h.name + " is full");
+            return;
+        }
+
+        // ---Move to hand---
+        MoveToHand(deck, h);
+    }
+
+    private static void MoveToHand(Deck deck, Hand h)
+    {
+        Transform c = deck.RemoveAt(0);
+
+        if (c == null)
+        {
+            UnityEngine.Debug.Log("Deck empty");
+            return;
+        }
+
+        h.PlaceUnsafe(c);
+
+        UnityEngine.Debug.Log("Card " + c.name + " placed at " + h.name);
+    }
+
+
+
     // ########################################################################################## //
     #endregion
 
@@ -565,6 +709,12 @@ public class GameManager : MonoBehaviour
     }
     public int GetScore(){
         return _score;
+    }
+
+    internal float GetCurrentMana(TurnOwner player)
+    {
+        Player p = player == TurnOwner.PlayerOne ? _playerOne : _playerTwo;
+        return p.currentMana;
     }
     #endregion
 

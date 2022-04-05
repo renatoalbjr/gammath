@@ -73,4 +73,40 @@ public class Field : MonoBehaviour
         int x = turnOwner == TurnOwner.PlayerOne ? (int) slotType : 7-(int) slotType;
         return slots[x, columnIndex].GetContent(0);
     }
+
+    internal void AdvanceCards(TurnOwner turnOwner, SlotType slotType)
+    {
+        if(slotType == SlotType.FrontColumn){
+            Debug.Log("Cantt advance card in "+slotType.ToString());
+            return;
+        }
+
+        // ---Get the index of the columns---
+        SlotType destinationType = slotType + 1;
+        int originX = turnOwner == TurnOwner.PlayerOne ? (int) slotType : 7-(int) slotType;
+        int destinationX = turnOwner == TurnOwner.PlayerOne ? (int) destinationType : 7-(int) destinationType;
+
+        // ---Move cards---
+        for(int y = 0; y < fieldSize.y; y++){
+            // ---Continues if theres a card at destination---
+            if(slots[destinationX, y].GetContent(0) != null){
+                Debug.Log("Can't advance "+turnOwner.ToString()+"'s"+"card in "+slotType.ToString()+"_"+y+" because there's a card in front");
+                continue;
+            }
+
+            // ---Get the card in the origin---
+            Card c = slots[originX, y].GetContent(0);
+
+            // ---Continues if theres no card at origin---
+            if(c == null){
+                Debug.Log("Can't advance "+turnOwner.ToString()+"'s"+"card in "+slotType.ToString()+"_"+y+" because the slot is empty");
+                continue;
+            }
+
+            //slots[originX, y].Remove(c);
+            slots[originX, y].RemoveWithouCost(c);
+            slots[destinationX, y].PlaceUnsafe(c);
+            Debug.Log(turnOwner.ToString()+"'s"+"card in "+slotType.ToString()+"_"+y+" moved forward");
+        }
+    }
 }

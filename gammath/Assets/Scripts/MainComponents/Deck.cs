@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-public class Deck : ContainerBase//, IPointerClickHandler
+public class Deck : ContainerBase, IBelong, IPointerClickHandler
 {
+    private Player owner;
+
     #region Variables
     
     #endregion
@@ -86,6 +88,9 @@ public class Deck : ContainerBase//, IPointerClickHandler
         cardTransform.position = new Vector3(cardTransform.position.x,
                                                 cardTransform.position.y,
                                                 -transform.childCount+index);
+        // ---Disable Draggable---
+        Draggable dragComp = cardTransform.GetComponent<Draggable>();
+        if(dragComp != null) dragComp.enabled = false;
     }
     public void PlaceAt(Transform cardTransform, int index){
         _checkIndexes(index);
@@ -147,13 +152,26 @@ public class Deck : ContainerBase//, IPointerClickHandler
     #endregion
 
     #region RemoveAt
-    private void _RemoveAt(int index){
-        Remove(transform.GetChild(index));
+    private Transform _RemoveAt(int index){
+        // ---Get the removed object reference---
+        Transform removed = transform.GetChild(index);
+
+        // ---Enable Draggable at card---
+        Draggable dragComp = removed.GetComponent<Draggable>();
+        if(dragComp != null) dragComp.enabled = true;
+
+
+        // ---Remove using ContainerBase method---
+        Remove(removed);
+        return removed;
     }
-    public void RemoveAt(int index){
+    public Transform RemoveAt(int index){
+        //Can't remove if there's nothing inside
+        if(filledCapacity == 0) return null;
+
         _checkIndexes(index);
         int fixedIndex = Mathf.Clamp(index, 0, filledCapacity-1);
-        _RemoveAt(fixedIndex);
+        return _RemoveAt(fixedIndex);
     }
     #endregion
 
@@ -178,6 +196,22 @@ public class Deck : ContainerBase//, IPointerClickHandler
         if(index < 0 || index >= filledCapacity)
             Debug.Log("Invalid index passed to DeckManager, index = " + index.ToString());
     }
-    #endregion
 
+    #endregion
+    public Player GetOwner()
+    {
+        return owner;
+    }
+
+    public Player BelongsTo(Player p)
+    {
+        Debug.Log(string.Format("{0} now belongs to {1}", gameObject.name, p.gameObject.name));
+        return owner = p;
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    {
+        Debug.Log("The deck "+gameObject.name+" was clicked");
+        EventManager.Instance.StartClickOnDeck(this);
+    }
 }

@@ -9,9 +9,11 @@ public class CardData : ScriptableObject
     #region Variables
     [SerializeField] private int _attack;
     [SerializeField] private float _health;
+    [SerializeField] private int _manaCost;
 
     public int Attack { get => _attack; private set => _attack = value; }
     public float Health { get => _health; private set => _health = value; }
+    public int ManaCost { get => _manaCost; private set => _manaCost = value; }
 
     #endregion
 
